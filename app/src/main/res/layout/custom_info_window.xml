@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/info_window_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <android.support.v4.widget.CircleImageView
+            android:id="@+id/info_box_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/stylist_name_info_box"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="stylist_name" />
+
+            <TextView
+                android:id="@+id/salon_name_info_box"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="salon_name" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="long click to view profile"
+                android:textStyle="italic"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

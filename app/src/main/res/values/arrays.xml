@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="gender_array" >
+        <item>male</item>
+        <item>female</item>
+    </string-array>
+
+    <string-array name="activities">
+        <item>Home</item>
+        <item>Add salon</item>
+        <item>Register style</item>
+        <item>Edit style</item>
+        <item>View bookings</item>
+        <item>View history</item>
+        <item>Settings</item>
+        <item>About us</item>
+        <item>Privacy policy</item>
+    </string-array>
+</resources>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/grdnt"
+    tools:context=".stylist.StyleDetails">
+
+    <Spinner
+        android:id="@+id/style_gender_spinner"
+        android:layout_width="331dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/salonLocation"
+        android:layout_marginTop="18dp"
+        android:entries="@array/gender_array"
+        android:textSize="19dp"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:paddingStart="@dimen/activity_vertical_margin"
+        android:paddingEnd="@dimen/activity_vertical_margin"/>
+
+    <EditText
+        android:id="@+id/salonLocation"
+        android:layout_width="337dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:layout_marginTop="18dp"
+        android:layout_below="@+id/salonName"
+        android:ems="10"
+        android:hint="Salon Location"
+        android:inputType="textPersonName"
+        android:paddingStart="@dimen/activity_vertical_margin"
+        android:paddingEnd="@dimen/activity_vertical_margin"
+        android:layout_marginStart="@dimen/activity_vertical_margin" />
+
+    <EditText
+        android:id="@+id/salonName"
+        android:layout_width="347dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/style_name"
+        android:layout_marginTop="18dp"
+        android:ems="10"
+        android:hint="Salon Name"
+        android:paddingEnd="@dimen/activity_vertical_margin"
+        android:inputType="textPersonName"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:paddingStart="@dimen/activity_vertical_margin" />
+
+    <Button
+        android:id="@+id/styleButtonSave"
+        android:layout_width="212dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/costStyle"
+        android:layout_marginTop="18dp"
+        android:text="Save"
+        android:gravity="center"
+        android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp"
+        android:textColor="@color/colorPrimary"
+        android:text="Stylist Information"
+        android:textSize="19dp" />
+
+    <EditText
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:id="@+id/style_name"
+        android:layout_width="358dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView"
+        android:layout_marginTop="18dp"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingEnd="@dimen/activity_vertical_margin"
+        android:ems="10"
+        android:hint="Style Name"
+        android:inputType="textPersonName"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:paddingStart="@dimen/activity_vertical_margin" />
+
+    <EditText
+        android:id="@+id/costStyle"
+        android:layout_width="358dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingEnd="@dimen/activity_vertical_margin"
+        android:layout_below="@+id/style_gender_spinner"
+        android:layout_marginTop="18dp"
+        android:ems="10"
+        android:hint="amount"
+        android:inputType="number"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
+        android:paddingStart="@dimen/activity_vertical_margin" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="226dp"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="57dp"
+        android:src="@drawable/ic_add_black_24dp"
+        app:srcCompat="?android:attr/actionModeSplitBackground"
+        tools:ignore="UnknownId" />
+
+    <ImageView
+        android:id="@+id/editImage"
+        android:layout_width="45dp"
+        android:layout_height="35dp"
+        android:layout_alignTop="@+id/imageView"
+        android:layout_marginTop="162dp"
+        android:layout_alignRight="@+id/imageView"
+        android:src="@drawable/ic_edit_black_24dp"
+        app:srcCompat="?attr/actionBarDivider"
+        android:layout_alignEnd="@+id/imageView" />
+</RelativeLayout>

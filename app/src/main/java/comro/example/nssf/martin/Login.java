@@ -4,12 +4,18 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import comro.example.nssf.martin.customer.CustomerMainPage;
 import comro.example.nssf.martin.customer.CustomerSignUp;
 import comro.example.nssf.martin.customer.SearchStyle;
 import comro.example.nssf.martin.stylist.Stylist;
@@ -39,19 +46,22 @@ public class Login extends AppCompatActivity {
     private FirebaseAuth auth;
     private ProgressDialog progressDialog;
     private AlertDialog.Builder alertDialog;
-    AlertDialog dialog;
+    private AlertDialog dialog;
     private final String[] accountTypes = {"Customer", "Stylist"};
     private ArrayList<Integer> choices = new ArrayList<>();
+    private RelativeLayout relativeLayout;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         loginEmailTxt= findViewById(R.id.loginEmail);
         signUpBtn = findViewById(R.id.signUpBtn);
         loginPasswordTxt = findViewById(R.id.loginPassword);
         loginbtn = findViewById(R.id.loginbtn);
+        relativeLayout = findViewById(R.id.login);
 
         choices.add(0);
 
@@ -127,20 +137,45 @@ public class Login extends AppCompatActivity {
                         progressDialog.dismiss();
                         if(task.isSuccessful()){
 
-                            Toast.makeText(Login.this, "success", Toast.LENGTH_LONG).show();
+//                            /Toast.makeText(Login.this, "success", Toast.LENGTH_SHORT).show();
+                            int unicode = 0x1F60A;
+                            String emoji = getEmojiByUnicode(unicode);
 
-                            final DatabaseReference ref =  FirebaseDatabase.getInstance().getReference();
+                            //set up snack bar
+                            Snackbar snackbar = Snackbar.make(relativeLayout, "Logged in successfully " + emoji, Snackbar.LENGTH_SHORT);
+                            View view = snackbar.getView();
+                            TextView mView = view.findViewById(android.support.design.R.id.snackbar_text);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                                mView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                            } else {
+                                mView.setGravity(Gravity.CENTER_HORIZONTAL);
+                            }
+                            mView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_textsize));
+                            mView.setBackgroundColor((ContextCompat.getColor(Login.this, R.color.colorPrimary)));
+                            snackbar.show();
+
+                            final DatabaseReference ref =  FirebaseDatabase.getInstance().getReference().child("customers");
                             final Boolean[] exists = new Boolean[1];
                             final String userId = auth.getCurrentUser().getUid();
+                            final String email = auth.getCurrentUser().getEmail();
 
                             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    exists[0] = dataSnapshot.child("customers").child(userId).exists();
-                                    Log.d("ondatachange", exists[0].toString());
+                                    exists[0] = false;
+                                    for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                                        Log.d("user id", userId);
+                                        if(snapshot.child("email").getValue().toString().equals(email)){
+                                            exists[0] = true;
+                                            break;
+                                        }
+                                        Log.d("value of exist1", exists[0].toString());
+                                    }
+//                                    exists[0] = dataSnapshot.child("customers").child(userId).exists();
 
+                                    Log.d("value of exist", exists[0].toString());
                                     if(exists[0].equals(true)){
-                                        startActivity(new Intent(Login.this, SearchStyle.class));
+                                        startActivity(new Intent(Login.this, CustomerMainPage.class));
                                     }
                                     else{
                                         startActivity(new Intent(Login.this, StylistMainPage.class));
@@ -153,11 +188,22 @@ public class Login extends AppCompatActivity {
                             });
                         }
                         else{
-                            Toast.makeText(Login.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            int unicode = 0x1F629;
+                            String emoji = getEmojiByUnicode(unicode);
+                            Snackbar snackbar = Snackbar.make(relativeLayout, emoji + " " +task.getException().getMessage(), Snackbar.LENGTH_LONG);
+                            View view = snackbar.getView();
+                            TextView mView = view.findViewById(android.support.design.R.id.snackbar_text);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                                mView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                            } else {
+                                mView.setGravity(Gravity.CENTER_HORIZONTAL);
+                            }
+                            mView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_textsize));
+                            mView.setBackgroundColor((ContextCompat.getColor(Login.this, R.color.colorPrimary)));
+                            snackbar.show();
                         }
                     }
                 });
-
             }
         });
 
@@ -171,5 +217,7 @@ public class Login extends AppCompatActivity {
 
     }
 
-
+    public String getEmojiByUnicode(int unicode){
+        return new String(Character.toChars(unicode));
+    }
 }

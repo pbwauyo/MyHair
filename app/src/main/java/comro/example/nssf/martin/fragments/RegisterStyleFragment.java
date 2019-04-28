@@ -270,11 +270,33 @@ public class RegisterStyleFragment extends Fragment {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     String salonId = dataSnapshot.child(salonName).getValue().toString();
+                                    DatabaseReference styleRef = databaseReference.push();
+                                    final DatabaseReference stylesNumberRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(id);
 
                                     StylistInformation stylistInformation = new StylistInformation(styleName, salonName, gender, styleCost, downloadURL, id, salonId);
-                                    DatabaseReference styleRef = databaseReference.push();
+
                                     styleRef.setValue(stylistInformation);
                                     styleRef.child("price_range").setValue(priceRange);
+
+                                    //number of styles
+                                    stylesNumberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            if(dataSnapshot.child("styles_number").exists()){
+                                                int styles = Integer.parseInt(dataSnapshot.child("styles_number").getValue().toString());
+                                                styles++;
+                                                stylesNumberRef.child("styles_number").setValue(styles);
+                                            }
+                                            else{
+                                                stylesNumberRef.child("styles_number").setValue(1);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -321,12 +343,10 @@ public class RegisterStyleFragment extends Fragment {
                 style_name = styleNameTxt.getText().toString().trim();
                 salon_name = salonNameSpinner.getSelectedItem().toString().trim();
                 cost = costStyleTxt.getText().toString().trim();
-                style_gender = styleGender.getSelectedItem().toString();
+                style_gender = styleGender.getSelectedItem().toString().trim();
 
                 styleNameTxt.setText("");
                 costStyleTxt.setText("");
-
-                styleGender.setPrompt("choose gender");
 
                 uploadImage(storageReference, ref, style_name, salon_name, style_gender, cost, userId);
 
@@ -345,23 +365,24 @@ public class RegisterStyleFragment extends Fragment {
 
     public String setPriceRange(long cost, String gender){
         String priceRange = "0";
-        String priceRanges[] = getResources().getStringArray(R.array.price_ranges_female);
+        String femalePriceRanges[] = getResources().getStringArray(R.array.price_ranges_female);
+        String malePriceRanges[] = getResources().getStringArray(R.array.price_ranges_male);
 
         if(gender.equals("female")){
             if(cost >= 10000 && cost <= 15000){
-                priceRange = priceRanges[0];
+                priceRange = femalePriceRanges[0];
             }
             else if(cost >= 16000 && cost <= 25000){
-                priceRange = priceRanges[1];
+                priceRange = femalePriceRanges[1];
             }
             else if(cost >= 26000 && cost <= 50000){
-                priceRange = priceRanges[2];
+                priceRange = femalePriceRanges[2];
             }
             else if(cost >= 51000 && cost <= 100000){
-                priceRange = priceRanges[3];
+                priceRange = femalePriceRanges[3];
             }
             else if(cost > 100000){
-                priceRange = priceRanges[4];
+                priceRange = femalePriceRanges[4];
             }
             else{
                 return "0";
@@ -370,13 +391,13 @@ public class RegisterStyleFragment extends Fragment {
 
         else if (gender.equals("male")){
             if(cost >= 1000 && cost <= 4900){
-                priceRange = priceRanges[0];
+                priceRange = malePriceRanges[0];
             }
             else if(cost >= 5000 && cost <= 10000){
-                priceRange = priceRanges[1];
+                priceRange = malePriceRanges[1];
             }
             else if(cost > 10000){
-                priceRange = priceRanges[2];
+                priceRange = malePriceRanges[2];
             }
             else{
                 return "0";

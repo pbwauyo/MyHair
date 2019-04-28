@@ -1,10 +1,13 @@
 package comro.example.nssf.martin.customer;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,12 +30,14 @@ import comro.example.nssf.martin.InfoWindowAdapter;
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.dataModels.Style;
 
-public class StylistsMapView extends AppCompatActivity implements OnMapReadyCallback {
+public class StylistsMapView extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowLongClickListener {
 
     private GoogleMap mMap;
     private Toolbar toolbar;
     private ArrayList<Style> arrayList;
     HashMap<String, Marker> markers = new HashMap<>();
+    HashMap<String, String > stylistids = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
         setContentView(R.layout.activity_stylists_map_view);
         Bundle bundle = getIntent().getExtras();
         arrayList = (ArrayList<Style>) bundle.getSerializable("styles");
+        Log.d("name", arrayList.get(0).getName());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         toolbar = findViewById(R.id.map_toolbar);
@@ -67,27 +73,34 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
         DatabaseReference locationsRef = FirebaseDatabase.getInstance().getReference().child("stylists");
         final LatLng[] location = new LatLng[1];
         final MarkerOptions markerOptions = new MarkerOptions();
+        final Marker[] marker = new Marker[1];
 
         locationsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d("name2", arrayList.get(0).getName());
                 for(Style style : arrayList){
-                    double latitude = Double.parseDouble(dataSnapshot.child(style.getId()).child("saloon_details").child(style.getSalonId()).child("latitude").toString());
-                    double longitude = Double.parseDouble(dataSnapshot.child(style.getId()).child("saloon_details").child(style.getSalonId()).child("longitude").toString());
+                    double latitude = Double.parseDouble(dataSnapshot.child(style.getId()).child("salons_details").child(style.getSalonId()).child("latitude").getValue().toString());
+                    double longitude = Double.parseDouble(dataSnapshot.child(style.getId()).child("salons_details").child(style.getSalonId()).child("longitude").getValue().toString());
                     String styleImage = style.getimage();
-                    String salonName = dataSnapshot.child(style.getId()).child("saloon_details").child(style.getSalonId()).child("name").toString();
-                    String stylistName = dataSnapshot.child(style.getId()).child("name").toString();
+                    String salonName = dataSnapshot.child(style.getId()).child("salons_details").child(style.getSalonId()).child("name").getValue().toString();
+                    String stylistName = dataSnapshot.child(style.getId()).child("name").getValue().toString();
                     String name = style.getName();
+                    String stylistId = style.getId();
+
+
                     location[0] = new LatLng(latitude, longitude);
 
 //                    markerOptions.alpha(0.7f);
 //                    markerOptions.title(name);
                     markerOptions.position(location[0]);
-                    markers.put(name,mMap.addMarker(markerOptions));
+                    marker[0] = mMap.addMarker(markerOptions);
+
+                    stylistids.put(marker[0].getId(), stylistId);
+                    markers.put(name, marker[0]);
 
                     mMap.setInfoWindowAdapter(new InfoWindowAdapter(getApplicationContext(), stylistName, salonName, styleImage));
                 }
-
 
 
                 LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -103,5 +116,16 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
+        mMap.setOnInfoWindowLongClickListener(this);
+
+    }
+
+    @Override
+    public void onInfoWindowLongClick(Marker marker) {
+        String id = stylistids.get(marker.getId());
+
+        Intent intent = new Intent(StylistsMapView.this, ViewStylistProfile.class);
+        intent.putExtra("stylist_id", id);
+        startActivity(intent);
     }
 }

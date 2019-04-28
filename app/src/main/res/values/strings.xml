@@ -42,7 +42,7 @@
     <string name="name">Name</string>
     <string name="gender">Email</string>
 
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBqraav2NvhGKU2piGCqmW82qnwG6cAkfE </string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCjHFL8VMlZQrzDe03_D3ebLn62n_WU3_c</string>
     <string-array name="array_styles">
         <item>pencil</item>
         <item>thread</item>
@@ -71,4 +71,10 @@
     <string name="nav_about_us">About us</string>
     <string name="nav_view_bookings">View bookings</string>
     <string name="title_activity_stylists_map_view">Map</string>
+    <string name="unfollow">UNFOLLOW</string>
+    <string name="follow">FOLLOW</string>
+    <string name="service_not_available">Service not available</string>
+    <string name="invalid_lat_long_used">Invalid latitude and longitude</string>
+    <string name="no_address_found">No address found</string>
+    <string name="address_found">Address found</string>
 </resources>

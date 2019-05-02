@@ -12,10 +12,11 @@
         android:gravity="center"
         android:padding="16dp">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/nav_image"
             android:layout_width="100dp"
-            android:layout_height="100dp" />
+            android:layout_height="100dp"
+            android:src="@drawable/ic_default_dp"/>
 
         <TextView
             android:textColor="#44391A"
@@ -23,7 +24,7 @@
             android:id="@+id/nav_name"
             android:padding="8dp"
             android:textSize="16sp"
-            android:hint="KEVIN DE BRUYNE"
+            android:hint="@string/loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

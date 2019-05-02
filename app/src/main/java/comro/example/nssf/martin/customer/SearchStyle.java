@@ -1,16 +1,9 @@
 package comro.example.nssf.martin.customer;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,13 +15,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,13 +25,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import comro.example.nssf.martin.R;
-import comro.example.nssf.martin.TrackerService;
-import comro.example.nssf.martin.dataModels.CurrentLocation;
 import comro.example.nssf.martin.dataModels.Style;
-import comro.example.nssf.martin.stylist.AddSalon;
 
 public class SearchStyle extends AppCompatActivity {
     private Button searchButton;
@@ -55,12 +37,11 @@ public class SearchStyle extends AppCompatActivity {
     private StorageReference storageReference;
     private FirebaseAuth auth;
     private String userId;
-    private CurrentLocation currentLocation;
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
     private final int LOCATION_PERMISSION_REQUEST = 99;
-    private FusedLocationProviderClient fusedLocationProviderClient;
     private CoordinatorLayout coordinatorLayout;
+    private Location customerLocation, salonLocation;
+    private DatabaseReference detailsRef;
+    private double customerLatitude, salonLatitude, customerLongitude, salonLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,28 +59,7 @@ public class SearchStyle extends AppCompatActivity {
         pricesSpinner = findViewById(R.id.prices_spinner);
         locationTxt = findViewById(R.id.location_txt);
 
-        // create location call back
-        mLocationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult){
-                Location location = locationResult.getLastLocation();
-                onLocationChange(location);
-            }
-        };
-
-        // Create the LocationRequest object
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-                .setFastestInterval(1 * 1000); // 1 second, in milliseconds
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-//        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        checkPermissions();
+        detailsRef = FirebaseDatabase.getInstance().getReference().child("customers").child(userId);
 
         storageReference = FirebaseStorage.getInstance().getReference().child(userId).child("style_image");
 
@@ -141,9 +101,9 @@ public class SearchStyle extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final String selectedGender = genderSpinner.getSelectedItem().toString();
-                final String selectedStyle = stylesTxt.getText().toString();
+                final String selectedStyle = stylesTxt.getText().toString().trim();
                 final String selectedPrice = pricesSpinner.getSelectedItem().toString();
-                final String location = locationTxt.getText().toString();
+                final String location = locationTxt.getText().toString().trim();
 
                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -165,9 +125,9 @@ public class SearchStyle extends AppCompatActivity {
                             final String salonId = ds.child("salonId").getValue().toString();
 
                             //if location is input
+                            boolean styleExists = selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price);
                             if(!location.equals("")) {
-                                if (selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price)) {
-
+                                if (styleExists) {
                                     locationsRef[0].addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -197,27 +157,40 @@ public class SearchStyle extends AppCompatActivity {
                             }
                             // if location is not input
                             else {
-                                if (selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price)) {
-
+                                if (styleExists) {
                                     locationsRef[0].addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            double latitude = Double.parseDouble(dataSnapshot.child(id).child("salons_details").child(salonId).child("latitude").getValue().toString());
-                                            double longitude = Double.parseDouble(dataSnapshot.child(id).child("salons_details").child(salonId).child("longitude").getValue().toString());
+
+                                            //salon location
+                                            final Location salonLocation = new Location("salon_location");
+                                            salonLatitude = Double.parseDouble(dataSnapshot.child(id).child("salons_details").child(salonId).child("latitude").getValue().toString());
+                                            salonLongitude = Double.parseDouble(dataSnapshot.child(id).child("salons_details").child(salonId).child("longitude").getValue().toString());
+                                            salonLocation.setLatitude(salonLatitude);
+                                            salonLocation.setLongitude(salonLongitude);
+
+                                            detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    //customer location
+                                                    customerLocation = new Location("customer_location");
+                                                    customerLatitude = Double.parseDouble(dataSnapshot.child("location").child("latitude").getValue().toString());
+                                                    customerLongitude = Double.parseDouble(dataSnapshot.child("location").child("longitude").getValue().toString());
+                                                    customerLocation.setLatitude(customerLatitude);
+                                                    customerLocation.setLongitude(customerLongitude);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+
+                                            //distance between customer and salon
                                             double distanceBetween;
+                                            distanceBetween = customerLocation.distanceTo(salonLocation);
 
-                                            //start point
-                                            Location start = new Location("start");
-                                            start.setLatitude(currentLocation.getLatitude());
-                                            start.setLongitude(currentLocation.getLongitude());
-
-                                            //stop point
-                                            Location stop = new Location("stop");
-                                            stop.setLatitude(latitude);
-                                            stop.setLongitude(longitude);
-
-                                            //distance between
-                                            distanceBetween = start.distanceTo(stop);
+                                            Log.d("distance between", String.valueOf(distanceBetween));
 
                                             if(distanceBetween <= 50000){
                                                 count[0]++;
@@ -258,109 +231,6 @@ public class SearchStyle extends AppCompatActivity {
 
             }
         });
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        switch(requestCode){
-            case LOCATION_PERMISSION_REQUEST:
-                // permission granted
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    //addSalon.setEnabled(true);
-                    getLastLocation();
-                }
-                // permission denied therefore, close application
-                else{
-                    createSnackBar("please allow request permissions");
-                }
-        }
-
-    }
-
-//    private void startTrackerService() {
-//        startService(new Intent(this, TrackerService.class));
-//    }
-
-    public void onLocationChange(Location location) {
-        currentLocation = new CurrentLocation(location.getLatitude(), location.getLongitude());
-    }
-
-    @SuppressLint("MissingPermission")
-    public void getLastLocation(){
-        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if(task.isSuccessful()){
-                    Location location = task.getResult();
-                    if(location == null){
-                        try {
-                            fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-                        }
-                        catch (SecurityException e){
-                            createSnackBar(e.getMessage());
-                        }
-                    }
-                    else{
-                        onLocationChange(location);
-                    }
-                }
-                else{
-                    createSnackBar("unable to get current location");
-                }
-
-            }
-        });
-    }
-
-    private void createSnackBar(String message){
-        Snackbar snackbar = Snackbar
-                .make(coordinatorLayout, message, Snackbar.LENGTH_INDEFINITE)
-                .setAction("Fix it", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        ActivityCompat.requestPermissions(SearchStyle.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                LOCATION_PERMISSION_REQUEST);
-                    }
-                });
-        snackbar.show();
-    }
-
-
-    public  void checkPermissions(){
-        // check if permission has not been granted
-        if(ContextCompat.checkSelfPermission(SearchStyle.this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-
-            //if not, explain to the user
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-                createSnackBar("location is needed please");
-            }
-            // no need for explanation, just request permissions
-            else{
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        LOCATION_PERMISSION_REQUEST);
-            }
-        }
-        // permission already granted, therefore perform tasks
-        else{
-//            addSalon.setEnabled(true);
-            getLastLocation();
-        }
-    }
-
-    // life cycle methods
-    @Override
-    protected void onStop() {
-        super.onStop();
-        fusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        fusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
     }
 
 }

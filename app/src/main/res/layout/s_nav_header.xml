@@ -12,21 +12,20 @@
         android:orientation="vertical"
         android:padding="@dimen/activity_horizontal_margin">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/stylist_profile_picture"
             android:layout_width="@dimen/profile_width"
             android:layout_height="@dimen/profile_height"
             android:paddingTop="16dp"
             android:src="@drawable/empty_avatar"
-            android:layout_gravity="center"
-            />
+            android:layout_gravity="center" />
 
         <TextView
             android:id="@+id/s_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
-            android:hint="Kevin De Bruyne"
+            android:hint="name"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <RatingBar

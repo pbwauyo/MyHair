@@ -6,11 +6,11 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.squareup.picasso.Picasso;
 
 import comro.example.nssf.martin.R;
 
@@ -52,14 +50,14 @@ public class StylistHomePageFragment extends Fragment {
     private Toolbar toolbar;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView profilePic;
-    private TextView name, email, phoneNo, location;
+    private TextView nameTxt, emailTxt, phoneNoTxt, locationTxt;
+    private String name, email, phoneNo, location;
+    private FloatingActionButton editProfilePic;
     FirebaseAuth auth;
     FirebaseStorage firebaseStorage;
     DatabaseReference databaseReference;
-    ArrayList<String> results = new ArrayList<>();
-
-
-
+    //ArrayList<String> results = new ArrayList<>();
+    private String dpUrl;
 
     public StylistHomePageFragment() {
         // Required empty public constructor
@@ -103,11 +101,12 @@ public class StylistHomePageFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_stylist_home_page, container, false);
 
         profilePic = view.findViewById(R.id.profile_pic);
-        name = view.findViewById(R.id.s_profile_name);
-        email = view.findViewById(R.id.s_profile_email);
-        location = view.findViewById(R.id.s_profile_location);
-        phoneNo = view.findViewById(R.id.s_profile_number);
+        nameTxt = view.findViewById(R.id.s_profile_name);
+        emailTxt = view.findViewById(R.id.s_profile_email);
+        locationTxt = view.findViewById(R.id.s_profile_location);
+        phoneNoTxt = view.findViewById(R.id.s_profile_number);
         toolbar = view.findViewById(R.id.stylist_toolbar);
+        editProfilePic = view.findViewById(R.id.s_fab);
 
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity)(getActivity())).getSupportActionBar().setTitle("Home");
@@ -138,20 +137,30 @@ public class StylistHomePageFragment extends Fragment {
         //calling sync state is necessary or else your hamburger icon wont show up
         actionBarDrawerToggle.syncState();
 
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                results.add(dataSnapshot.child("name").getValue().toString());
-                results.add(dataSnapshot.child("email").getValue().toString());
-                results.add(dataSnapshot.child("location").getValue().toString());
-                results.add(dataSnapshot.child("contact").getValue().toString());
+                name = dataSnapshot.child("nameTxt").getValue().toString();
+                email = dataSnapshot.child("emailTxt").getValue().toString();
+                //location = dataSnapshot.child("locationTxt").getValue().toString();
+                phoneNo = dataSnapshot.child("contact").getValue().toString();
 
-                name.setText(results.get(0));
-                email.setText(results.get(1));
-                location.setText(results.get(2));
-                phoneNo.setText(results.get(3));
+                nameTxt.setText(name);
+                emailTxt.setText(email);
+               // locationTxt.setText(location);
+                phoneNoTxt.setText(phoneNo);
 
-                Log.d("first_name", results.get(0) + results.get(1) + results.get(2) + results.get(3));
+                //only set image if image url exists
+                if(dataSnapshot.child("imageUrl").exists()){
+                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                    Picasso.get()
+                            .load(dpUrl)
+                            .centerCrop()
+                            .fit()
+                            .into(profilePic);
+                }
+
+               // Log.d("first_name", results.get(0) + results.get(1) + results.get(2) + results.get(3));
             }
 
             @Override
@@ -175,9 +184,9 @@ public class StylistHomePageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        Log.d("name", results.get(0) + results.get(1) + results.get(2) + results.get(3));
+//        Log.d("nameTxt", results.get(0) + results.get(1) + results.get(2) + results.get(3));
 
-        profilePic.setOnClickListener(new View.OnClickListener() {
+        editProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dispatchTakePictureIntent();

@@ -22,8 +22,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,10 +56,10 @@ import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link CustomerHomeFragment#newInstance} factory method to
+ * Use the {@link CustomerProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CustomerHomeFragment extends Fragment {
+public class CustomerProfileFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -79,7 +77,7 @@ public class CustomerHomeFragment extends Fragment {
     protected Location lastLocation;
     private String currentPhotoPath;
     CoordinatorLayout coordinatorLayout;
-    String userId;
+    String userId, dpUrl;
     DatabaseReference detailsRef;
     private final int REQUEST_TAKE_PHOTO = 1;
     private AddressResultReceiver resultReceiver;
@@ -91,7 +89,7 @@ public class CustomerHomeFragment extends Fragment {
                                                                         R.drawable.image_5, R.drawable.image_6};
     private ArrayList<Integer> recommendations = new ArrayList<>();
 
-    public CustomerHomeFragment() {
+    public CustomerProfileFragment() {
         // Required empty public constructor
     }
 
@@ -101,11 +99,11 @@ public class CustomerHomeFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment CustomerHomeFragment.
+     * @return A new instance of fragment CustomerProfileFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CustomerHomeFragment newInstance(String param1, String param2) {
-        CustomerHomeFragment fragment = new CustomerHomeFragment();
+    public static CustomerProfileFragment newInstance(String param1, String param2) {
+        CustomerProfileFragment fragment = new CustomerProfileFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -127,26 +125,28 @@ public class CustomerHomeFragment extends Fragment {
 
         recommendations.addAll(Arrays.asList(imageIds));
 
-//        detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                double latitude = Double.parseDouble(dataSnapshot.child("location").child("latitude").getValue().toString());
-//                double longitude = Double.parseDouble(dataSnapshot.child("location").child("longitude").getValue().toString());
-//
-//                // configure location
-//                Location location = new Location("customer location");
-//                location.setLatitude(latitude);
-//                location.setLongitude(longitude);
-//
-//                lastLocation = location;
-//                startIntentService();
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
+        detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("location").exists()) {
+                    double latitude = Double.parseDouble(dataSnapshot.child("location").child("latitude").getValue().toString());
+                    double longitude = Double.parseDouble(dataSnapshot.child("location").child("longitude").getValue().toString());
+
+                    // configure location
+                    Location location = new Location("customer location");
+                    location.setLatitude(latitude);
+                    location.setLongitude(longitude);
+
+                    lastLocation = location;
+                    startIntentService();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -166,39 +166,6 @@ public class CustomerHomeFragment extends Fragment {
         editName = view.findViewById(R.id.edit_name);
         newNameTxt = view.findViewById(R.id.edit_customer_profile_name);
         coordinatorLayout = view.findViewById(R.id.coordinator_layout);
-
-        editName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nameTxt.setVisibility(View.GONE);
-                newNameTxt.setVisibility(View.VISIBLE);
-            }
-        });
-
-        editPicFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dispatchTakePictureIntent();
-            }
-        });
-
-        detailsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String name = dataSnapshot.child("name").getValue().toString();
-                String email = dataSnapshot.child("email").getValue().toString();
-                String phoneNo = dataSnapshot.child("contact").getValue().toString();
-
-                //set views
-                nameTxt.setText(name);
-                emailTxt.setText(email);
-                phoneNoTxt.setText(phoneNo);
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity)(getActivity())).getSupportActionBar().setTitle("Home");
@@ -235,6 +202,49 @@ public class CustomerHomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        editName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nameTxt.setVisibility(View.GONE);
+                newNameTxt.setVisibility(View.VISIBLE);
+            }
+        });
+
+        editPicFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchTakePictureIntent();
+            }
+        });
+
+        detailsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String name = dataSnapshot.child("name").getValue().toString();
+                String email = dataSnapshot.child("email").getValue().toString();
+                String phoneNo = dataSnapshot.child("contact").getValue().toString();
+
+                //set views
+                nameTxt.setText(name);
+                emailTxt.setText(email);
+                phoneNoTxt.setText(phoneNo);
+
+                //only set image if image url exists
+                if(dataSnapshot.child("imageUrl").exists()){
+                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                    Picasso.get()
+                            .load(dpUrl)
+                            .centerCrop()
+                            .fit()
+                            .into(profilePicView);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     protected void startIntentService() {

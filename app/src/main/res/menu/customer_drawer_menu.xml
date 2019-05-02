@@ -2,25 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group>
-        <item android:id="@+id/customer_home"
-            android:title="Home"
-            android:icon="@drawable/ic_home_black_24dp_2"/>
+        <item android:id="@+id/customer_profile"
+            android:title="Profile"
+            android:icon="@drawable/ic_person"/>
 
         <item android:id="@+id/search_style"
             android:title="Search style"
             android:icon="@drawable/ic_search_black_24dp"/>
 
-        <item android:id="@+id/view_all"
-            android:title="View all stylists"
-            android:icon="@drawable/ic_format_list_bulleted_black_24dp"/>
-
-        <item android:id="@+id/customer_notifs"
-            android:title="Notifications"
-            android:icon="@drawable/ic_notifications_black_24dp"/>
-
-        <item android:id="@+id/customer_chats"
-            android:title="Chats"
-            android:icon="@drawable/ic_chat_black_24dp"/>
+        <item android:id="@+id/customer_requests"
+            android:title="Hair requests"
+            android:icon="@drawable/ic_request_24dp"/>
     </group>
 
     <item android:title="Other">
@@ -33,9 +25,9 @@
                 android:title="About us"
                 android:icon="@drawable/ic_person_black_24dp"/>
 
-            <item android:id="@+id/settings"
-                android:title="Settings"
-                android:icon="@drawable/ic_settings_black_24dp"/>
+            <item android:id="@+id/sign_out"
+                android:title="Sign out"
+                android:icon="@drawable/ic_sign_out_24dp"/>
         </menu>
 
     </item>

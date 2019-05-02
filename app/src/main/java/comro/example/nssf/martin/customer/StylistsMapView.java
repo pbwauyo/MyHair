@@ -37,6 +37,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
     private ArrayList<Style> arrayList;
     HashMap<String, Marker> markers = new HashMap<>();
     HashMap<String, String > stylistids = new HashMap<>();
+    HashMap<String, String> stylistNames = new HashMap<>();
 
 
     @Override
@@ -97,6 +98,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
                     marker[0] = mMap.addMarker(markerOptions);
 
                     stylistids.put(marker[0].getId(), stylistId);
+                    stylistNames.put(stylistId, stylistName);
                     markers.put(name, marker[0]);
 
                     mMap.setInfoWindowAdapter(new InfoWindowAdapter(getApplicationContext(), stylistName, salonName, styleImage));
@@ -123,9 +125,11 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onInfoWindowLongClick(Marker marker) {
         String id = stylistids.get(marker.getId());
+        String name = stylistNames.get(id);
 
         Intent intent = new Intent(StylistsMapView.this, ViewStylistProfile.class);
         intent.putExtra("stylist_id", id);
+        intent.putExtra("stylist_name", name);
         startActivity(intent);
     }
 }

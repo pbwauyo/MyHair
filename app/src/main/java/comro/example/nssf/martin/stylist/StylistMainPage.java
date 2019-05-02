@@ -17,45 +17,89 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.squareup.picasso.Picasso;
+
+import comro.example.nssf.martin.Login;
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.fragments.RegisterStyleFragment;
 import comro.example.nssf.martin.fragments.StylistHomePageFragment;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class StylistMainPage extends AppCompatActivity {
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
     private View navHeader;
     private Toolbar toolbar;
-    private ImageView profilePicture;
+    private CircleImageView profilePicture;
     private TextView name;
+    private RatingBar ratingBar;
 
     private int navItemIndex = 0;
 
-    private final String TAG_HOME = "Home";
-    private final String TAG_REGISTER_STYLE= "RegisterStyle";
-    private final String TAG_EDIT_STYLE = "EditStyle";
-    private final String TAG_VIEW_BOOKINGS = "ViewBookings";
-    private final String TAG_VIEW_HISTORY = "ViewHistory";
-    private String CURRENT_TAG = TAG_HOME;
-    private final String privacyPolicy = "This is our privacy policy";
-    private final String aboutUs = "Kitiyo Martin\nNamuyomba Angella\nAtuhaire Diana";
+    private DatabaseReference detailsRef;
+
+    private final String TAG_PROFILE = "Profile";
+    private final String TAG_REGISTER_STYLE= "Register Style";
+   // private final String TAG_EDIT_STYLE = "Edit Style";
+    //private final String TAG_ADD_SALON = "Add Salon";
+    private String CURRENT_TAG = TAG_PROFILE;
+    private final String PRIVACY_POLICY = "This application may only be used for the intended purposes";
+    private final String ABOUT_US = "Kitiyo Martin\nNamuyomba Angella\nAtuhaire Diana";
     private AlertDialog.Builder alertDialog;
     private AlertDialog dialog;
     private CoordinatorLayout coordinatorLayout;
+    private FirebaseAuth auth;
+    private String userId;
+    private FirebaseAuth.AuthStateListener authStateListener;
 
     private Handler mHandler;
     private String[] activities;
+
+    private String userName;
+    private String dpUrl;
+    private float rating;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stylist_main_page);
+        FirebaseMessaging.getInstance().subscribeToTopic("hairRequests");
+        FirebaseMessaging.getInstance().unsubscribeFromTopic("hairRequestReplies");
 
 //        toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
+        navHeader = navigationView.getHeaderView(0);
+
+        name = navHeader.findViewById(R.id.s_name);
+        ratingBar = navHeader.findViewById(R.id.rating_bar);
+        profilePicture = navHeader.findViewById(R.id.stylist_profile_picture);
+
+        auth = FirebaseAuth.getInstance();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (auth.getCurrentUser() == null) {
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("hairRequests");
+                    startActivity(new Intent(StylistMainPage.this, Login.class));
+                    finish();
+                }
+            }
+        };
+        auth.addAuthStateListener(authStateListener);
+
+        userId = auth.getCurrentUser().getUid();
+
+        detailsRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(userId);
 
         activities = getResources().getStringArray(R.array.activities);
 
@@ -65,27 +109,32 @@ public class StylistMainPage extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             navItemIndex = 0;
-            CURRENT_TAG = TAG_HOME;
+            CURRENT_TAG = TAG_PROFILE;
             loadFragment();
         }
 //        coordinatorLayout = findViewById(R.id.coordinator_layout);
         //initialise alert dialog
         alertDialog = new AlertDialog.Builder(this);
 
+    }
 
+    @Override
+    public void onStart(){
+        super.onStart();
+        loadNavHeader();
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()){
-                    case R.id.nav_home:
+                    case R.id.nav_profile:
                         navItemIndex = 0;
-                        CURRENT_TAG = TAG_HOME;
+                        CURRENT_TAG = TAG_PROFILE;
                         break;
 
                     case R.id.nav_add_salon:
                         navItemIndex = 1;
-                        CURRENT_TAG = "AddSalon";
+                        // CURRENT_TAG = TAG_ADD_SALON;
                         break;
 
                     case R.id.nav_register_style:
@@ -93,31 +142,20 @@ public class StylistMainPage extends AppCompatActivity {
                         CURRENT_TAG = TAG_REGISTER_STYLE;
                         break;
 
-                    case R.id.nav_edit_style:
-                        navItemIndex = 3;
-                        CURRENT_TAG = TAG_EDIT_STYLE;
-                        break;
-
                     case R.id.viewBookings:
-                        navItemIndex = 4;
-                        CURRENT_TAG = TAG_VIEW_BOOKINGS;
-                        break;
-
-                    case R.id.nav_view_history:
-                        navItemIndex = 5;
-                        CURRENT_TAG = TAG_VIEW_HISTORY;
-                        break;
-
-                    case R.id.nav_settings:
-                        navItemIndex = 6;
+                        navItemIndex = 3;
                         break;
 
                     case R.id.nav_about_us:
-                        navItemIndex = 7;
+                        navItemIndex = 4;
                         break;
 
                     case R.id.nav_privacy_policy:
-                        navItemIndex = 8;
+                        navItemIndex = 5;
+                        break;
+
+                    case R.id.nav_sign_out:
+                        navItemIndex = 6;
                         break;
                 }
 
@@ -135,16 +173,28 @@ public class StylistMainPage extends AppCompatActivity {
                         drawerLayout.closeDrawers();
                         startActivity(new Intent(StylistMainPage.this, AddSalon.class));
                         break;
-                    case 7:
+
+                    case 3:
+                        //start view bookings activity
+                        break;
+
+                    case 4:
                         drawerLayout.closeDrawers();
-                        dialog = createAlertDialog(alertDialog, aboutUs);
+                        dialog = createAlertDialog(alertDialog, "Developers", ABOUT_US);
                         dialog.show();
                         break;
-                    case 8:
+
+                    case 5:
                         drawerLayout.closeDrawers();
-                        dialog = createAlertDialog(alertDialog, privacyPolicy);
+                        dialog = createAlertDialog(alertDialog, "Privacy policy", PRIVACY_POLICY);
                         dialog.show();
                         break;
+
+                    case 6:
+                        drawerLayout.closeDrawers();
+                        signOut();
+                        break;
+
                     default:
                         loadFragment();
                 }
@@ -166,11 +216,38 @@ public class StylistMainPage extends AppCompatActivity {
 
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
-
     }
 
     void loadNavHeader(){
 
+        detailsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                userName = dataSnapshot.child("name").getValue().toString();
+
+                //only set rating if it exists
+                if(dataSnapshot.child("rating").exists()){
+                    rating = Float.parseFloat((dataSnapshot.child("rating").getValue().toString()));
+                    ratingBar.setRating(rating);
+                }
+
+                //only set profile picture if it exists
+                if(dataSnapshot.child("imageUrl").exists()){
+                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                    Picasso.get()
+                            .load(dpUrl)
+                            .centerCrop()
+                            .fit()
+                            .into(profilePicture);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private Fragment getDisplayFragment(){
@@ -228,7 +305,7 @@ public class StylistMainPage extends AppCompatActivity {
         if (shouldLoadHomeFragOnBackPress) {
             if (navItemIndex != 0) {
                 navItemIndex = 0;
-                CURRENT_TAG = TAG_HOME;
+                CURRENT_TAG = TAG_PROFILE;
                 loadFragment();
                 return;
             }
@@ -237,8 +314,8 @@ public class StylistMainPage extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    private AlertDialog createAlertDialog(AlertDialog.Builder builder, String message){
-        builder.setTitle("Developers");
+    private AlertDialog createAlertDialog(AlertDialog.Builder builder, String title, String message){
+        builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(true);
         builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
@@ -251,4 +328,7 @@ public class StylistMainPage extends AppCompatActivity {
         return builder.create();
     }
 
+    private void signOut(){
+        auth.signOut();
+    }
 }

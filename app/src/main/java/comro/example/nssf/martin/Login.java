@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,6 +47,9 @@ public class Login extends AppCompatActivity {
     private FirebaseAuth auth;
     private ProgressDialog progressDialog;
     private AlertDialog.Builder alertDialog;
+    //private String userId;
+    private FirebaseUser firebaseUser;
+    String currentUserEmail;
     private AlertDialog dialog;
     private final String[] accountTypes = {"Customer", "Stylist"};
     private ArrayList<Integer> choices = new ArrayList<>();
@@ -62,6 +66,35 @@ public class Login extends AppCompatActivity {
         loginPasswordTxt = findViewById(R.id.loginPassword);
         loginbtn = findViewById(R.id.loginbtn);
         relativeLayout = findViewById(R.id.login);
+
+        // initialise firebase auth
+        auth = FirebaseAuth.getInstance();
+
+        DatabaseReference stylistsRef = FirebaseDatabase.getInstance().getReference().child("stylists");
+        //sign in automatically incase there's a signed in user
+        if(auth.getCurrentUser() != null){
+            firebaseUser = auth.getCurrentUser();
+            stylistsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds: dataSnapshot.getChildren()){
+                        currentUserEmail = ds.child("email").getValue().toString();
+                        if(currentUserEmail.equals(firebaseUser.getEmail())){
+                            startActivity(new Intent(Login.this, StylistMainPage.class));
+                            finish();
+                        }
+                    }
+                    startActivity(new Intent(Login.this, CustomerMainPage.class));
+                    finish();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+
+
+        }
 
         choices.add(0);
 
@@ -116,8 +149,6 @@ public class Login extends AppCompatActivity {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setCancelable(false);
 
-        // initialise firebase auth
-        auth = FirebaseAuth.getInstance();
 
         // add listener to login button
         loginbtn.setOnClickListener(new View.OnClickListener() {

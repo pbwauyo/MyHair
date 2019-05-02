@@ -3,40 +3,28 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_home"
-            android:icon="@drawable/ic_home"
-            android:title="@string/nav_home" />
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_person"
+            android:title="@string/nav_profile" />
         <item
             android:id="@+id/nav_add_salon"
             android:icon="@drawable/ic_add_box_black_24dp"
             android:title="Add salon" />
         <item
             android:id="@+id/nav_register_style"
-            android:icon="@drawable/ic_add_box_black_24dp"
+            android:icon="@drawable/ic_register_style_24dp"
             android:title="@string/nav_register_style" />
-        <item
-            android:id="@+id/nav_edit_style"
-            android:icon="@drawable/ic_edit_black_24dp"
-            android:title="@string/nav_edit_style" />
 
         <item
             android:id="@+id/nav_view_bookings"
             android:title="@string/nav_view_bookings"
             android:icon="@drawable/ic_view_agenda_black_24dp"/>
 
-        <item
-            android:id="@+id/nav_view_history"
-            android:icon="@drawable/ic_history_black_24dp"
-            android:title="@string/nav_view_history" />
 
     </group>
 
     <item android:title="Other">
         <menu>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_settings_black_24dp"
-                android:title="@string/nav_settings" />
             <item
                 android:id="@+id/nav_about_us"
                 android:title="@string/nav_about_us"
@@ -45,6 +33,10 @@
                 android:id="@+id/nav_privacy_policy"
                 android:title="@string/privacy_policy"
                 android:icon="@drawable/ic_format_list_bulleted_black_24dp"/>
+            <item
+                android:id="@+id/nav_sign_out"
+                android:icon="@drawable/ic_sign_out_24dp"
+                android:title="@string/sign_out" />
         </menu>
     </item>
 

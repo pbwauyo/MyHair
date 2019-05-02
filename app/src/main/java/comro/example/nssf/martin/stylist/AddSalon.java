@@ -221,29 +221,7 @@ public class AddSalon extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     public void getLastLocation(){
-        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if(task.isSuccessful()){
-                    Location location = task.getResult();
-                    if(location == null){
-                        try {
-                            fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-                        }
-                        catch (SecurityException e){
-                            createSnackBar(e.getMessage());
-                        }
-                    }
-                    else{
-                        onLocationChange(location);
-                    }
-                }
-                else{
-                    createSnackBar("unable to get current location");
-                }
-
-            }
-        });
+        fusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
 }

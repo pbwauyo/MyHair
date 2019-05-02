@@ -4,15 +4,12 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import comro.example.nssf.martin.R;
+import comro.example.nssf.martin.dataModels.Message;
 
 public class ViewStylistProfile extends AppCompatActivity {
     private String stylistId;
@@ -30,6 +28,11 @@ public class ViewStylistProfile extends AppCompatActivity {
     private Button followBtn, requestBtn;
     private String name, styles, followers, email, phone, location, rating, profileP;
     private String currentUserId;
+    private String requestId;
+    private String stylistName;
+    private String senderName, imageUrl;
+    private DatabaseReference notifRef, detailsRef, followingRef;
+    private Message message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +52,15 @@ public class ViewStylistProfile extends AppCompatActivity {
 
         Intent intent = getIntent();
         stylistId = intent.getStringExtra("stylist_id");
+        stylistName = intent.getStringExtra("stylist_name");
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+        followingRef = FirebaseDatabase.getInstance().getReference();
+        notifRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(stylistId).child("notifications").child("requests");
+
         //check if customer is following stylist
-        final DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("customers").child(currentUserId);
-        followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        detailsRef = FirebaseDatabase.getInstance().getReference().child("customers").child(currentUserId);
+        detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.child("following").exists()) {
@@ -123,6 +130,35 @@ public class ViewStylistProfile extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        // send request notifications
+        requestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestId = notifRef.push().getKey();
+
+                detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        senderName = dataSnapshot.child("name").getValue().toString();
+                        if(dataSnapshot.child("imageUrl").exists()) {
+                            imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                            message = new Message("hair request", senderName, currentUserId, imageUrl, stylistName, stylistId, requestId, "");
+                        }
+                        else {
+                            message = new Message("hair request", senderName, currentUserId, "", stylistName, stylistId, requestId, "");
+                        }
+                        notifRef.child(requestId).setValue(message);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
 
             }
         });

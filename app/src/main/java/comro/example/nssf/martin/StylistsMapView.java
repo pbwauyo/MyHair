@@ -36,6 +36,9 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
     HashMap<String, Marker> markers = new HashMap<>();
     HashMap<String, String > stylistids = new HashMap<>();
     HashMap<String, String> stylistNames = new HashMap<>();
+    HashMap<String, String> styleNames = new HashMap<>();
+    HashMap<String, String> styleImages = new HashMap<>();
+    HashMap<String, String> phoneNumbers = new HashMap<>();
 
 
     @Override
@@ -86,6 +89,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
                     String stylistName = dataSnapshot.child(style.getId()).child("name").getValue().toString();
                     String name = style.getName();
                     String stylistId = style.getId();
+                    String phoneNo = dataSnapshot.child(stylistId).child("contact").getValue().toString();
 
 
                     location[0] = new LatLng(latitude, longitude);
@@ -97,6 +101,9 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
 
                     stylistids.put(marker[0].getId(), stylistId);
                     stylistNames.put(stylistId, stylistName);
+                    styleNames.put(stylistId, name);
+                    styleImages.put(stylistId, styleImage);
+                    phoneNumbers.put(stylistId, phoneNo);
                     markers.put(name, marker[0]);
 
                     mMap.setInfoWindowAdapter(new InfoWindowAdapter(getApplicationContext(), stylistName, salonName, styleImage));
@@ -124,10 +131,16 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
     public void onInfoWindowLongClick(Marker marker) {
         String id = stylistids.get(marker.getId());
         String name = stylistNames.get(id);
+        String styleName = styleNames.get(id);
+        String styleImg = styleImages.get(id);
+        String phoneN = phoneNumbers.get(id);
 
         Intent intent = new Intent(StylistsMapView.this, ViewStylistProfile.class);
         intent.putExtra("stylist_id", id);
         intent.putExtra("stylist_name", name);
+        intent.putExtra("style_name", styleName);
+        intent.putExtra("style_image", styleImg);
+        intent.putExtra("phone_number", phoneN);
         startActivity(intent);
     }
 

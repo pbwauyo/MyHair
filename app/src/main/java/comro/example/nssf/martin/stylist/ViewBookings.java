@@ -29,31 +29,31 @@ public class ViewBookings extends AppCompatActivity {
         stylistDetailsRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(stylistId);
     }
 
-    public void processRequest(final String messageId, final String requestStatus){
-        replyId = customerDetailsRef.push().getKey();
-        stylistDetailsRef.child(messageId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                stylistName = dataSnapshot.child("name").getValue().toString();
-                imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
-                customerName = dataSnapshot.child("notifications").child("requests").child(messageId).child("senderName").getValue().toString();
-                customerId = dataSnapshot.child("notifications").child("requests").child(messageId).child("senderId").getValue().toString();
-
-                if(requestStatus.equals("accepted")) {
-                    message = new Message("request accepted", stylistName, stylistId, imageUrl, customerName, customerId, messageId, "accepted");
-                }
-                else{
-                    message = new Message("request declined", stylistName, stylistId, imageUrl, customerName, customerId, messageId, "declined");
-                    dataSnapshot.child("notifications").child("requests").child(messageId).getRef().removeValue();
-                }
-                customerDetailsRef.child(customerId).child("requests").child(replyId).setValue(message);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
+//    public void processRequest(final String messageId, final String requestStatus){
+//        replyId = customerDetailsRef.push().getKey();
+//        stylistDetailsRef.child(messageId).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                stylistName = dataSnapshot.child("name").getValue().toString();
+//                imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
+//                customerName = dataSnapshot.child("notifications").child("requests").child(messageId).child("senderName").getValue().toString();
+//                customerId = dataSnapshot.child("notifications").child("requests").child(messageId).child("senderId").getValue().toString();
+//
+//                if(requestStatus.equals("accepted")) {
+//                    message = new Message("request accepted", stylistName, stylistId, imageUrl, customerName, customerId, messageId, "accepted");
+//                }
+//                else{
+//                    message = new Message("request declined", stylistName, stylistId, imageUrl, customerName, customerId, messageId, "declined");
+//                    dataSnapshot.child("notifications").child("requests").child(messageId).getRef().removeValue();
+//                }
+//                customerDetailsRef.child(customerId).child("requests").child(replyId).setValue(message);
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
 
 }

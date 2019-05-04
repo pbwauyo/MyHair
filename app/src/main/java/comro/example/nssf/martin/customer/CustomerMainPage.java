@@ -24,7 +24,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
@@ -33,8 +32,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,6 +45,7 @@ import comro.example.nssf.martin.Login;
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.dataModels.CurrentLocation;
 import comro.example.nssf.martin.fragments.CustomerProfileFragment;
+import comro.example.nssf.martin.fragments.HairRequestsFragment;
 import comro.example.nssf.martin.fragments.SearchFragment;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -56,7 +54,7 @@ public class CustomerMainPage extends AppCompatActivity {
     private FrameLayout frameLayout;
     private String TAG_PROFILE = "Customer Home";
     private String TAG_SEARCH = "Search Style";
-//    private String TAG_REQUESTS = "Hair Requests";
+    private String TAG_REQUESTS = "Hair Requests";
     private final String ABOUT_US = "Atuhaire Diana\nNamuyomba Angella\nKitiyo Martin";
     private final String PRIVACY_POLICY = "This application may only be used for the intended purposes";
    // private String TAG_
@@ -129,7 +127,7 @@ public class CustomerMainPage extends AppCompatActivity {
     @Override
     public void onStart(){
         super.onStart();
-        //loadNavHeader();
+        loadNavHeader();
 
         // create location call back
         mLocationCallback = new LocationCallback(){
@@ -166,6 +164,7 @@ public class CustomerMainPage extends AppCompatActivity {
 
                     case R.id.customer_requests:
                         navItemIndex = 2;
+                        CURRENT_TAG = TAG_REQUESTS;
                         break;
 
                     case R.id.privacy_policy:
@@ -197,6 +196,7 @@ public class CustomerMainPage extends AppCompatActivity {
                         loadFragment();
                         break;
                     case 2:
+                        loadFragment();
                         break;
                     case 3:
                         drawer.closeDrawers();
@@ -240,6 +240,8 @@ public class CustomerMainPage extends AppCompatActivity {
                 return new CustomerProfileFragment();
             case 1:
                 return  new SearchFragment();
+            case 2:
+                return new HairRequestsFragment();
             default:
                 return new CustomerProfileFragment();
         }
@@ -249,13 +251,10 @@ public class CustomerMainPage extends AppCompatActivity {
         if (getSupportFragmentManager().findFragmentByTag(CURRENT_TAG)!=null){
             drawer.closeDrawers();
         }
-
         Runnable pendingRunnable = new Runnable() {
             @Override
             public void run() {
-
                 Fragment fragment = getDisplayFragment();
-
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
                 fragmentTransaction.replace(R.id.customer_frame, fragment, CURRENT_TAG);

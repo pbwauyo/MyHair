@@ -9,8 +9,10 @@ public class Message {
     private String receiverId;
     private String messageId;
     private String status;
+    private String styleName;
+    private String styleImage, senderContact, receiverContact;
 
-    public Message(String message, String senderName, String senderId, String senderImage, String receiverName, String receiverId, String messageId, String status) {
+    public Message(String message, String senderName, String senderId, String senderImage, String receiverName, String receiverId, String messageId, String status, String styleName, String styleImage, String senderContact, String receiverContact) {
         this.message = message;
         this.senderName = senderName;
         this.senderId = senderId;
@@ -19,6 +21,10 @@ public class Message {
         this.receiverId = receiverId;
         this.messageId = messageId;
         this.status = status;
+        this.styleName = styleName;
+        this.styleImage = styleImage;
+        this.senderContact = senderContact;
+        this.receiverContact = receiverContact;
     }
 
     public String getMessage() {
@@ -83,5 +89,37 @@ public class Message {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getStyleName() {
+        return styleName;
+    }
+
+    public void setStyleName(String styleName) {
+        this.styleName = styleName;
+    }
+
+    public String getStyleImage() {
+        return styleImage;
+    }
+
+    public void setStyleImage(String styleImage) {
+        this.styleImage = styleImage;
+    }
+
+    public String getSenderContact() {
+        return senderContact;
+    }
+
+    public void setSenderContact(String senderContact) {
+        this.senderContact = senderContact;
+    }
+
+    public String getReceiverContact() {
+        return receiverContact;
+    }
+
+    public void setReceiverContact(String receiverContact) {
+        this.receiverContact = receiverContact;
     }
 }

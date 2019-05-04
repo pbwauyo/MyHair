@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -29,8 +30,8 @@ public class ViewStylistProfile extends AppCompatActivity {
     private String name, styles, followers, email, phone, location, rating, profileP;
     private String currentUserId;
     private String requestId;
-    private String stylistName;
-    private String senderName, imageUrl;
+    private String stylistName, styleName;
+    private String senderName, imageUrl, styleImg, stylistContact;
     private DatabaseReference notifRef, detailsRef, followingRef;
     private Message message;
 
@@ -53,6 +54,9 @@ public class ViewStylistProfile extends AppCompatActivity {
         Intent intent = getIntent();
         stylistId = intent.getStringExtra("stylist_id");
         stylistName = intent.getStringExtra("stylist_name");
+        styleName = intent.getStringExtra("style_name");
+        styleImg = intent.getStringExtra("style_image");
+        stylistContact = intent.getStringExtra("phone_number");
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         followingRef = FirebaseDatabase.getInstance().getReference();
@@ -124,8 +128,6 @@ public class ViewStylistProfile extends AppCompatActivity {
                     styles = dataSnapshot.child("styles_number").getValue().toString();
                     stylesTxt.setText(styles);
                 }
-
-//                Glide.with(ViewStylistProfile.this).
             }
 
             @Override
@@ -144,13 +146,15 @@ public class ViewStylistProfile extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         senderName = dataSnapshot.child("name").getValue().toString();
+                        String senderNumber = dataSnapshot.child("contact").getValue().toString();
                         if(dataSnapshot.child("imageUrl").exists()) {
                             imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
-                            message = new Message("hair request", senderName, currentUserId, imageUrl, stylistName, stylistId, requestId, "");
+                            message = new Message("hair request", senderName, currentUserId, imageUrl, stylistName, stylistId, requestId, "", styleName, styleImg, senderNumber, stylistContact);
                         }
                         else {
-                            message = new Message("hair request", senderName, currentUserId, "", stylistName, stylistId, requestId, "");
+                            message = new Message("hair request", senderName, currentUserId, "", stylistName, stylistId, requestId, "", styleName, styleImg, senderNumber, stylistContact);
                         }
+                        Toast.makeText(ViewStylistProfile.this, "Request sent successfully", Toast.LENGTH_SHORT).show();
                         notifRef.child(requestId).setValue(message);
                     }
 

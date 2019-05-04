@@ -33,6 +33,7 @@ import comro.example.nssf.martin.Login;
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.fragments.RegisterStyleFragment;
 import comro.example.nssf.martin.fragments.StylistHomePageFragment;
+import comro.example.nssf.martin.fragments.ViewBookingsFragment;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class StylistMainPage extends AppCompatActivity {
@@ -50,7 +51,7 @@ public class StylistMainPage extends AppCompatActivity {
 
     private final String TAG_PROFILE = "Profile";
     private final String TAG_REGISTER_STYLE= "Register Style";
-   // private final String TAG_EDIT_STYLE = "Edit Style";
+    private final String TAG_VIEW_BOOKINGS = "View Bookings";
     //private final String TAG_ADD_SALON = "Add Salon";
     private String CURRENT_TAG = TAG_PROFILE;
     private final String PRIVACY_POLICY = "This application may only be used for the intended purposes";
@@ -134,7 +135,6 @@ public class StylistMainPage extends AppCompatActivity {
 
                     case R.id.nav_add_salon:
                         navItemIndex = 1;
-                        // CURRENT_TAG = TAG_ADD_SALON;
                         break;
 
                     case R.id.nav_register_style:
@@ -142,8 +142,9 @@ public class StylistMainPage extends AppCompatActivity {
                         CURRENT_TAG = TAG_REGISTER_STYLE;
                         break;
 
-                    case R.id.viewBookings:
+                    case R.id.nav_view_bookings:
                         navItemIndex = 3;
+                        CURRENT_TAG = TAG_VIEW_BOOKINGS;
                         break;
 
                     case R.id.nav_about_us:
@@ -172,10 +173,6 @@ public class StylistMainPage extends AppCompatActivity {
                     case 1:
                         drawerLayout.closeDrawers();
                         startActivity(new Intent(StylistMainPage.this, AddSalon.class));
-                        break;
-
-                    case 3:
-                        //start view bookings activity
                         break;
 
                     case 4:
@@ -224,6 +221,7 @@ public class StylistMainPage extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 userName = dataSnapshot.child("name").getValue().toString();
+                name.setText(userName);
 
                 //only set rating if it exists
                 if(dataSnapshot.child("rating").exists()){
@@ -256,6 +254,8 @@ public class StylistMainPage extends AppCompatActivity {
                 return new StylistHomePageFragment();
             case 2:
                 return new RegisterStyleFragment();
+            case 3:
+                return new ViewBookingsFragment();
             default:
                 return new StylistHomePageFragment();
         }

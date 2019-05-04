@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="comro.example.nssf.martin">
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -28,18 +29,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".stylist.ViewBookings"></activity>
 
-        <service
-            android:name=".NotificationService"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <activity android:name=".customer.CustomerMainPage" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -51,6 +41,22 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".StylistsMapActivity"
+            android:label="@string/title_activity_stylists_map"/>
+        <activity android:name=".stylist.ViewBookings" />
+
+        <service
+            android:name=".NotificationService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".customer.CustomerMainPage" />
 
         <service
             android:name=".FetchAddressIntentService"
@@ -67,9 +73,9 @@
         </provider>
 
         <activity
-            android:name=".customer.StylistsMapView"
+            android:name=".StylistsMapView"
             android:label="@string/title_activity_stylists_map_view"
-            android:parentActivityName=".customer.SearchStyle" />
+            android:parentActivityName=".customer.CustomerMainPage" />
         <activity
             android:name=".stylist.AddSalon"
             android:parentActivityName=".stylist.StylistMainPage" />

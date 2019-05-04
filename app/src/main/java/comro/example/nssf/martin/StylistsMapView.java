@@ -1,13 +1,11 @@
-package comro.example.nssf.martin.customer;
+package comro.example.nssf.martin;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,8 +24,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import comro.example.nssf.martin.InfoWindowAdapter;
-import comro.example.nssf.martin.R;
+import comro.example.nssf.martin.customer.CustomerMainPage;
+import comro.example.nssf.martin.customer.ViewStylistProfile;
 import comro.example.nssf.martin.dataModels.Style;
 
 public class StylistsMapView extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowLongClickListener {
@@ -49,9 +47,9 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
         Log.d("name", arrayList.get(0).getName());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        toolbar = findViewById(R.id.map_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        toolbar = findViewById(R.id.map_toolbar);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -131,5 +129,12 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
         intent.putExtra("stylist_id", id);
         intent.putExtra("stylist_name", name);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, CustomerMainPage.class));
+        finish();
     }
 }

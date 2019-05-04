@@ -140,8 +140,8 @@ public class StylistHomePageFragment extends Fragment {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                name = dataSnapshot.child("nameTxt").getValue().toString();
-                email = dataSnapshot.child("emailTxt").getValue().toString();
+                name = dataSnapshot.child("name").getValue().toString();
+                email = dataSnapshot.child("email").getValue().toString();
                 //location = dataSnapshot.child("locationTxt").getValue().toString();
                 phoneNo = dataSnapshot.child("contact").getValue().toString();
 

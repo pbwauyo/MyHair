@@ -84,4 +84,5 @@
     <string name="loading">loading...</string>
     <string name="requests_replies">Hair request replies</string>
     <string name="requests_replies_description">This channel is for replies to hair requests</string>
+    <string name="title_activity_stylists_map">Map</string>
 </resources>

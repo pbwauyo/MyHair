@@ -20,6 +20,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -128,7 +129,7 @@ public class CustomerMainPage extends AppCompatActivity {
     @Override
     public void onStart(){
         super.onStart();
-        loadNavHeader();
+        //loadNavHeader();
 
         // create location call back
         mLocationCallback = new LocationCallback(){
@@ -274,9 +275,10 @@ public class CustomerMainPage extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 name = dataSnapshot.child("name").getValue().toString();
+                Log.d("name snapshot", name);
                 nameTxt.setText(name);
 
-                //only set image if image url exists
+                // only set image if image url exists
                 if(dataSnapshot.child("imageUrl").exists()){
                     dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
                     Picasso.get()
@@ -293,7 +295,6 @@ public class CustomerMainPage extends AppCompatActivity {
             }
         });
     }
-
 
     @Override
     public void onBackPressed() {

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,7 +27,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -53,13 +51,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import comro.example.nssf.martin.R;
-import comro.example.nssf.martin.TrackerService;
-import comro.example.nssf.martin.customer.SearchStyle;
-import comro.example.nssf.martin.customer.StylistsMapView;
+import comro.example.nssf.martin.StylistsMapView;
 import comro.example.nssf.martin.dataModels.CurrentLocation;
 import comro.example.nssf.martin.dataModels.Style;
-
-import static android.content.Context.LOCATION_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.

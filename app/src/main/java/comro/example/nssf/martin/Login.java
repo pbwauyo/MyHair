@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -34,8 +33,6 @@ import java.util.ArrayList;
 
 import comro.example.nssf.martin.customer.CustomerMainPage;
 import comro.example.nssf.martin.customer.CustomerSignUp;
-import comro.example.nssf.martin.customer.SearchStyle;
-import comro.example.nssf.martin.stylist.Stylist;
 import comro.example.nssf.martin.stylist.StylistMainPage;
 import comro.example.nssf.martin.stylist.StylistSignUp;
 
@@ -54,6 +51,7 @@ public class Login extends AppCompatActivity {
     private final String[] accountTypes = {"Customer", "Stylist"};
     private ArrayList<Integer> choices = new ArrayList<>();
     private RelativeLayout relativeLayout;
+    private boolean stylistLoggedIn;
 
 
     @Override
@@ -67,25 +65,48 @@ public class Login extends AppCompatActivity {
         loginbtn = findViewById(R.id.loginbtn);
         relativeLayout = findViewById(R.id.login);
 
+        // create progress dialog
+        progressDialog = new ProgressDialog(Login.this);
+
         // initialise firebase auth
         auth = FirebaseAuth.getInstance();
 
         DatabaseReference stylistsRef = FirebaseDatabase.getInstance().getReference().child("stylists");
         //sign in automatically incase there's a signed in user
         if(auth.getCurrentUser() != null){
+            progressDialog.setTitle("Logging in automatically");
+            progressDialog.setMessage("please wait...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
             firebaseUser = auth.getCurrentUser();
+            final String currentEmail = firebaseUser.getEmail();
             stylistsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    stylistLoggedIn = false;
                     for (DataSnapshot ds: dataSnapshot.getChildren()){
                         currentUserEmail = ds.child("email").getValue().toString();
-                        if(currentUserEmail.equals(firebaseUser.getEmail())){
-                            startActivity(new Intent(Login.this, StylistMainPage.class));
-                            finish();
+                        if(currentUserEmail.equals(currentEmail)){
+                            stylistLoggedIn = true;
+                            break;
                         }
                     }
-                    startActivity(new Intent(Login.this, CustomerMainPage.class));
-                    finish();
+
+                    // start activity basing 
+                    if(stylistLoggedIn){
+                        startActivity(new Intent(Login.this, StylistMainPage.class));
+                        progressDialog.setProgress(100);
+                        progressDialog.dismiss();
+                        finish();
+                    }
+                    else{
+                        startActivity(new Intent(Login.this, CustomerMainPage.class));
+                        progressDialog.setProgress(100);
+                        progressDialog.dismiss();
+                        finish();
+                    }
                 }
 
                 @Override
@@ -142,8 +163,6 @@ public class Login extends AppCompatActivity {
 
         dialog = alertDialog.create();
 
-        // create progress dialog
-        progressDialog = new ProgressDialog(Login.this);
         progressDialog.setTitle("Logging you in");
         progressDialog.setMessage("please wait...");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -195,21 +214,23 @@ public class Login extends AppCompatActivity {
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     exists[0] = false;
                                     for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                                        Log.d("user id", userId);
+                                       // Log.d("user id", userId);
                                         if(snapshot.child("email").getValue().toString().equals(email)){
                                             exists[0] = true;
                                             break;
                                         }
-                                        Log.d("value of exist1", exists[0].toString());
+                                        //Log.d("value of exist1", exists[0].toString());
                                     }
 //                                    exists[0] = dataSnapshot.child("customers").child(userId).exists();
 
                                     Log.d("value of exist", exists[0].toString());
                                     if(exists[0].equals(true)){
                                         startActivity(new Intent(Login.this, CustomerMainPage.class));
+                                        finish();
                                     }
                                     else{
                                         startActivity(new Intent(Login.this, StylistMainPage.class));
+                                        finish();
                                     }
                                 }
 

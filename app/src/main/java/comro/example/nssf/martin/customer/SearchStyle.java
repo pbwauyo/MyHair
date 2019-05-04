@@ -27,6 +27,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 
 import comro.example.nssf.martin.R;
+import comro.example.nssf.martin.StylistsMapView;
 import comro.example.nssf.martin.dataModels.Style;
 
 public class SearchStyle extends AppCompatActivity {

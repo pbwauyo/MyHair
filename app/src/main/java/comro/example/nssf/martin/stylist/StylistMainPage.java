@@ -75,6 +75,7 @@ public class StylistMainPage extends AppCompatActivity {
         setContentView(R.layout.activity_stylist_main_page);
         FirebaseMessaging.getInstance().subscribeToTopic("hairRequests");
         FirebaseMessaging.getInstance().unsubscribeFromTopic("hairRequestReplies");
+        navigationView = findViewById(R.id.s_nav_view);
 
 //        toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -103,7 +104,6 @@ public class StylistMainPage extends AppCompatActivity {
 
         activities = getResources().getStringArray(R.array.activities);
 
-        navigationView = findViewById(R.id.s_nav_view);
         mHandler = new Handler();
         drawerLayout = findViewById(R.id.drawer_layout);
 

@@ -82,6 +82,7 @@ public class CustomerMainPage extends AppCompatActivity {
     private final int LOCATION_PERMISSION_REQUEST = 99;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,7 +128,32 @@ public class CustomerMainPage extends AppCompatActivity {
     @Override
     public void onStart(){
         super.onStart();
-        loadNavHeader();
+        //loadNavHeader();
+
+        detailsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                name = dataSnapshot.child("name").getValue().toString();
+                Log.d("name snapshot", name);
+                nameTxt.setText(name);
+
+                // only set image if image url exists
+                if(dataSnapshot.child("imageUrl").exists()){
+                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                    Picasso.get()
+                            .load(dpUrl)
+                            .centerCrop()
+                            .rotate(90)
+                            .fit()
+                            .into(profilePic);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         // create location call back
         mLocationCallback = new LocationCallback(){
@@ -270,29 +296,6 @@ public class CustomerMainPage extends AppCompatActivity {
     }
 
     public void loadNavHeader(){
-        detailsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                name = dataSnapshot.child("name").getValue().toString();
-                Log.d("name snapshot", name);
-                nameTxt.setText(name);
-
-                // only set image if image url exists
-                if(dataSnapshot.child("imageUrl").exists()){
-                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
-                    Picasso.get()
-                            .load(dpUrl)
-                            .centerCrop()
-                            .fit()
-                            .into(profilePic);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -409,5 +412,8 @@ public class CustomerMainPage extends AppCompatActivity {
                 });
         snackbar.show();
     }
+
+
+
 
 }

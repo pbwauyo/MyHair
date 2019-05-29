@@ -234,13 +234,10 @@ public class RegisterStyleFragment extends Fragment {
 
             final StorageReference imageRef = storageRef.child(styleName.concat("." + fileExtension));
             UploadTask uploadTask = imageRef.putFile(filePath);
-            Log.d("file extension", styleName.concat("." + fileExtension));
-            Log.d("storage reference", storageRef.getPath());
 
             uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
                 public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    Log.d("then", "execute then() started....");
                     if (!task.isSuccessful()) {
                         Log.d("taskUpload", task.getException().getMessage());
                         Toast.makeText(getActivity(), "task upload unsuccessful: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();

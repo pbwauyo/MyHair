@@ -122,7 +122,37 @@ public class StylistMainPage extends AppCompatActivity {
     @Override
     public void onStart(){
         super.onStart();
-        loadNavHeader();
+       // loadNavHeader();
+        detailsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                userName = dataSnapshot.child("name").getValue().toString();
+                name.setText(userName);
+
+                //only set rating if it exists
+                if(dataSnapshot.child("rating").exists()){
+                    rating = Float.parseFloat((dataSnapshot.child("rating").getValue().toString()));
+                    ratingBar.setRating(rating);
+                }
+
+                //only set profile picture if it exists
+                if(dataSnapshot.child("imageUrl").exists()){
+                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                    Picasso.get()
+                            .load(dpUrl)
+                            .centerCrop()
+                            .fit()
+                            .rotate(90)
+                            .into(profilePicture);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -216,36 +246,6 @@ public class StylistMainPage extends AppCompatActivity {
     }
 
     void loadNavHeader(){
-
-        detailsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                userName = dataSnapshot.child("name").getValue().toString();
-                name.setText(userName);
-
-                //only set rating if it exists
-                if(dataSnapshot.child("rating").exists()){
-                    rating = Float.parseFloat((dataSnapshot.child("rating").getValue().toString()));
-                    ratingBar.setRating(rating);
-                }
-
-                //only set profile picture if it exists
-                if(dataSnapshot.child("imageUrl").exists()){
-                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
-                    Picasso.get()
-                            .load(dpUrl)
-                            .centerCrop()
-                            .fit()
-                            .into(profilePicture);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private Fragment getDisplayFragment(){

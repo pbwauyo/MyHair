@@ -24,12 +24,14 @@
                 android:id="@+id/stylist_name_info_box"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:hint="stylist_name" />
 
             <TextView
                 android:id="@+id/salon_name_info_box"
                 android:textStyle="bold"
+                android:textColor="#FFFFFF"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="salon_name" />
@@ -37,6 +39,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
                 android:text="long click to view profile"
                 android:textStyle="italic|bold"/>
 

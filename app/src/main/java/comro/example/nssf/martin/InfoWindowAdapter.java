@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
+import com.squareup.picasso.Picasso;
 
 import java.util.zip.Inflater;
 
@@ -29,7 +30,16 @@ public class InfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         TextView stylistNameTxt= view.findViewById(R.id.stylist_name_info_box);
         TextView salonNameTxt = view.findViewById(R.id.salon_name_info_box);
-        ImageView styleImage = view.findViewById(R.id.info_box_image);
+        ImageView imageView = view.findViewById(R.id.info_box_image);
+
+        if(!styleImage.equals("")) {
+            Picasso.get()
+                    .load(styleImage)
+                    .fit()
+                    .centerCrop()
+                    .rotate(90)
+                    .into(imageView);
+        }
 
         stylistNameTxt.setText(stylistName);
         salonNameTxt.setText(salonName);

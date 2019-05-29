@@ -29,7 +29,6 @@ import comro.example.nssf.martin.customer.ViewStylistProfile;
 import comro.example.nssf.martin.dataModels.Style;
 
 public class StylistsMapView extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowLongClickListener {
-
     private GoogleMap mMap;
     private Toolbar toolbar;
     private ArrayList<Style> arrayList;
@@ -114,7 +113,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
                 for (Marker marker : markers.values()) {
                     builder.include(marker.getPosition());
                 }
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 300));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
             }
 
             @Override

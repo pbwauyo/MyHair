@@ -36,6 +36,8 @@ import comro.example.nssf.martin.customer.CustomerSignUp;
 import comro.example.nssf.martin.stylist.StylistMainPage;
 import comro.example.nssf.martin.stylist.StylistSignUp;
 
+import static comro.example.nssf.martin.UtilityFunctions.getEmojiByUnicode;
+
 public class Login extends AppCompatActivity {
     private EditText loginEmailTxt, loginPasswordTxt;
     private TextView loginbtn, signUpBtn;
@@ -269,7 +271,5 @@ public class Login extends AppCompatActivity {
 
     }
 
-    public String getEmojiByUnicode(int unicode){
-        return new String(Character.toChars(unicode));
-    }
+
 }

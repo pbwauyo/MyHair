@@ -6,4 +6,5 @@
     <color name="graylight">#D3D3D3</color>
     <color name="startblue">#0000ff</color>
     <color name="endblue">#00bfff</color>
+    <color name="infoWindowBackground">#001f3f</color>
 </resources>

@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,6 +36,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -50,6 +55,7 @@ import comro.example.nssf.martin.Constants;
 import comro.example.nssf.martin.FetchAddressIntentService;
 import comro.example.nssf.martin.ImageAdapter;
 import comro.example.nssf.martin.R;
+import comro.example.nssf.martin.UtilityFunctions;
 import me.relex.circleindicator.CircleIndicator;
 
 import static android.app.Activity.RESULT_OK;
@@ -78,16 +84,19 @@ public class CustomerProfileFragment extends Fragment {
     private String currentPhotoPath;
     CoordinatorLayout coordinatorLayout;
     String userId, dpUrl;
-    DatabaseReference detailsRef;
+    DatabaseReference detailsRef, customersRef;
+    private ProgressBar progressBar, arrowProgressBar;
     private final int REQUEST_TAKE_PHOTO = 1;
     private AddressResultReceiver resultReceiver;
     ViewPager viewPager;
     int currentPage = 0;
-    CircleIndicator circleIndicator;
+    private CircleIndicator circleIndicator;
 
     private Integer imageIds[] = {R.drawable.image_1, R.drawable.image_2, R.drawable.image_3, R.drawable.image_4,
                                                                         R.drawable.image_5, R.drawable.image_6};
     private ArrayList<Integer> recommendations = new ArrayList<>();
+
+    private StorageReference profileImageRef;
 
     public CustomerProfileFragment() {
         // Required empty public constructor
@@ -121,16 +130,19 @@ public class CustomerProfileFragment extends Fragment {
         }
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         detailsRef = FirebaseDatabase.getInstance().getReference().child("customers").child(userId);
+        customersRef = FirebaseDatabase.getInstance().getReference().child("customers");
         resultReceiver = new AddressResultReceiver(new Handler());
+
+        profileImageRef = FirebaseStorage.getInstance().getReference().child("customer_profile_pictures").child(userId);
 
         recommendations.addAll(Arrays.asList(imageIds));
 
-        detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        detailsRef.child("location").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child("location").exists()) {
-                    double latitude = Double.parseDouble(dataSnapshot.child("location").child("latitude").getValue().toString());
-                    double longitude = Double.parseDouble(dataSnapshot.child("location").child("longitude").getValue().toString());
+                if(dataSnapshot.exists()) {
+                    double latitude = Double.parseDouble(dataSnapshot.child("latitude").getValue().toString());
+                    double longitude = Double.parseDouble(dataSnapshot.child("longitude").getValue().toString());
 
                     // configure location
                     Location location = new Location("customer location");
@@ -164,6 +176,8 @@ public class CustomerProfileFragment extends Fragment {
         phoneNoTxt = view.findViewById(R.id.customer_profile_number);
         locationTxt = view.findViewById(R.id.customer_profile_location);
         editName = view.findViewById(R.id.edit_name);
+        progressBar = view.findViewById(R.id.progress_bar);
+        arrowProgressBar = view.findViewById(R.id.arrowProgressBar);
         newNameTxt = view.findViewById(R.id.edit_customer_profile_name);
         coordinatorLayout = view.findViewById(R.id.coordinator_layout);
 
@@ -218,7 +232,41 @@ public class CustomerProfileFragment extends Fragment {
             }
         });
 
-        detailsRef.addValueEventListener(new ValueEventListener() {
+        detailsRef.child("imageUrl").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    String imageUrl = dataSnapshot.getValue().toString();
+                    if (!imageUrl.equals("")) {
+                        arrowProgressBar.setVisibility(View.VISIBLE);
+                        //load profile picture into profile page ImageView
+                        Picasso.get()
+                                .load(imageUrl)
+                                .fit()
+                                .centerCrop()
+                                .rotate(90)
+                                .into(profilePicView, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        arrowProgressBar.setVisibility(View.GONE);
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+
+                                    }
+                                });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        detailsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String name = dataSnapshot.child("name").getValue().toString();
@@ -229,16 +277,6 @@ public class CustomerProfileFragment extends Fragment {
                 nameTxt.setText(name);
                 emailTxt.setText(email);
                 phoneNoTxt.setText(phoneNo);
-
-                //only set image if image url exists
-                if(dataSnapshot.child("imageUrl").exists()){
-                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
-                    Picasso.get()
-                            .load(dpUrl)
-                            .centerCrop()
-                            .fit()
-                            .into(profilePicView);
-                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -341,7 +379,7 @@ public class CustomerProfileFragment extends Fragment {
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(getActivity(),
-                        "comro.example.nssf.martin.fragments",
+                        "comro.example.nssf.martin",
                         photoFile);
 
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -354,13 +392,9 @@ public class CustomerProfileFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-
             File file = new File(currentPhotoPath);
-            Picasso.get()
-                    .load(Uri.fromFile(file))
-                    .fit()
-                    .centerCrop()
-                    .into(profilePicView);
+            Uri uri = Uri.fromFile(file);
+            UtilityFunctions.uploadProfileImage(profileImageRef, uri, coordinatorLayout, progressBar, customersRef, userId);
         }
     }
 

@@ -72,7 +72,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
-            android:src="@drawable/ic_edit_black_24dp"
+            android:src="@drawable/edit_profile_picture_black"
             app:layout_anchor="@id/customer_app_bar"
             app:layout_anchorGravity="bottom|end" />
 
@@ -115,14 +115,30 @@
                         android:paddingBottom="9dp"
                         android:layout_weight="2"
                         android:layout_height="wrap_content"
-                        android:hint="enter new name"/>
+                        android:hint="new name"/>
 
                     <ImageView
-                        android:id="@+id/edit_name"
+                        android:id="@+id/change_name"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_edit_black_24dp" />
+
+                    <ImageView
+                        android:id="@+id/done_edit_name"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/done_icon_green"
+                        android:layout_marginEnd="8dp" />
+
+                    <ImageView
+                        android:id="@+id/cancel_edit_name"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_cancel_red" />
                 </LinearLayout>
 
                 <include layout="@layout/item_divider"/>
@@ -147,11 +163,38 @@
                         android:layout_weight="2"
                         android:hint="email"/>
 
+                    <EditText
+                        android:id="@+id/edit_customer_profile_email"
+                        android:layout_width="0dp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        android:paddingBottom="9dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:hint="new email"/>
+
                     <ImageView
+                        android:id="@+id/change_email"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/ic_edit_black_24dp"/>
+
+                    <ImageView
+                        android:id="@+id/done_edit_email"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/done_icon_green"
+                        android:layout_marginEnd="8dp" />
+
+                    <ImageView
+                        android:id="@+id/cancel_edit_email"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_cancel_red"/>
                 </LinearLayout>
 
                 <include layout="@layout/item_divider"/>
@@ -173,11 +216,39 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
                         android:hint="phone number"/>
+
+                    <EditText
+                        android:id="@+id/edit_customer_profile_number"
+                        android:layout_width="0dp"
+                        android:textStyle="bold"
+                        android:paddingBottom="9dp"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:hint="new phone number"/>
+
                     <ImageView
+                        android:id="@+id/change_number"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:src="@drawable/ic_edit_black_24dp"/>
+
+                    <ImageView
+                        android:id="@+id/done_edit_number"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_marginRight="8dp"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/done_icon_green"
+                        android:layout_marginEnd="8dp" />
+
+                    <ImageView
+                        android:id="@+id/cancel_edit_number"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_cancel_red"/>
                 </LinearLayout>
 
                 <include layout="@layout/item_divider"/>
@@ -199,11 +270,13 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="2"
                         android:hint="location"/>
+
                     <ImageView
+                        android:id="@+id/location_pin"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:src="@drawable/ic_edit_black_24dp"/>
+                        android:src="@drawable/map_pin"/>
                 </LinearLayout>
 
                 <include layout="@layout/item_divider"/>

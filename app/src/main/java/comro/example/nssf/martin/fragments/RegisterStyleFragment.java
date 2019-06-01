@@ -3,26 +3,31 @@ package comro.example.nssf.martin.fragments;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -41,14 +46,19 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.dataModels.StylistInformation;
-import comro.example.nssf.martin.stylist.StyleDetails;
-import comro.example.nssf.martin.stylist.StylistMainPage;
+
+import static android.app.Activity.RESULT_OK;
+import static comro.example.nssf.martin.UtilityFunctions.getEmojiByUnicode;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -77,10 +87,18 @@ public class RegisterStyleFragment extends Fragment {
     FirebaseStorage firebaseStorage;
     StorageReference storageReference;
     DatabaseReference databaseReference;
-    String userId, fileExtension;
+    String userId;
     private Uri filePath;
     private final int PICK_IMAGE_REQUEST = 71;
     private Toolbar toolbar;
+    private String currentPhotoPath;
+    private FrameLayout frameLayout;
+    private FloatingActionButton floatingActionButton;
+    private ArrayList<Integer> choices = new ArrayList<>();
+    private final String[] imageIntents = {"Take picture", "Choose from gallery"};
+
+    private AlertDialog.Builder alertDialog;
+    private AlertDialog dialog;
 
 
     public RegisterStyleFragment() {
@@ -116,7 +134,7 @@ public class RegisterStyleFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
         userId = auth.getCurrentUser().getUid();
         firebaseStorage = FirebaseStorage.getInstance();
-        storageReference = firebaseStorage.getReferenceFromUrl("gs://prototype-5625e.appspot.com/").child(userId).child("style_images");
+        storageReference = firebaseStorage.getReference().child(userId).child("style_images");
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -134,6 +152,8 @@ public class RegisterStyleFragment extends Fragment {
         styleButtonsave = view.findViewById(R.id.styleButtonSave);
         styleGender = view.findViewById(R.id.style_gender_spinner);
         toolbar = view.findViewById(R.id.fragment_toolbar);
+        frameLayout = view.findViewById(R.id.frame_layout);
+        floatingActionButton = view.findViewById(R.id.add_image);
 
         DatabaseReference salonNamesRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(userId).child("salon_names");
         final ArrayList<String> salonNames = new ArrayList<>();
@@ -155,6 +175,7 @@ public class RegisterStyleFragment extends Fragment {
 
             }
         });
+
 
         ((AppCompatActivity)(getActivity())).setSupportActionBar(toolbar);
         ((AppCompatActivity)(getActivity())).getSupportActionBar().setTitle("Register style");
@@ -192,22 +213,27 @@ public class RegisterStyleFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == StyleDetails.RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            stylePhoto.setImageBitmap(imageBitmap);
-        } else if (requestCode == PICK_IMAGE_REQUEST && resultCode == StyleDetails.RESULT_OK
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            File file = new File(currentPhotoPath);
+            filePath = Uri.fromFile(file);
+
+            Picasso.get()
+                    .load(filePath)
+                    .fit()
+                    .centerCrop()
+                    //.rotate(90)
+                    .into(stylePhoto);
+        }
+        else if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
                 && data != null && data.getData() != null) {
             filePath = data.getData();
-            fileExtension = getFileExtension(filePath);
 
-            Log.d("uri tostring()", filePath.getPath());
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), filePath);
-                stylePhoto.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                Picasso.get()
+                        .load(filePath)
+                        .fit()
+                        .centerCrop()
+                        //.rotate(90)
+                        .into(stylePhoto);
         }
 
     }
@@ -217,6 +243,48 @@ public class RegisterStyleFragment extends Fragment {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Snackbar.make(frameLayout, ex.getMessage(), Snackbar.LENGTH_LONG);
+
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getActivity(),
+                        "comro.example.nssf.martin",
+                        photoFile);
+
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     public String getFileExtension(Uri uri) {
@@ -232,7 +300,7 @@ public class RegisterStyleFragment extends Fragment {
             progressDialog.setTitle("Uploading...");
             progressDialog.show();
 
-            final StorageReference imageRef = storageRef.child(styleName.concat("." + fileExtension));
+            final StorageReference imageRef = storageRef.child(styleName);
             UploadTask uploadTask = imageRef.putFile(filePath);
 
             uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
@@ -266,6 +334,7 @@ public class RegisterStyleFragment extends Fragment {
                             salonIdsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    int unicode = 0x1F61A;
                                     String salonId = dataSnapshot.child(salonName).getValue().toString();
                                     DatabaseReference styleRef = databaseReference.push();
                                     final DatabaseReference stylesNumberRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(id);
@@ -274,6 +343,7 @@ public class RegisterStyleFragment extends Fragment {
 
                                     styleRef.setValue(stylistInformation);
                                     styleRef.child("price_range").setValue(priceRange);
+                                    Snackbar.make(frameLayout, "Style saved successfully ".concat(getEmojiByUnicode(unicode)), Snackbar.LENGTH_LONG).show();
 
                                     //number of styles
                                     stylesNumberRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -324,12 +394,58 @@ public class RegisterStyleFragment extends Fragment {
                 }
             });
         }
-
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+        choices.add(0);
+
+        // create alert dialog
+        alertDialog = new AlertDialog.Builder(getActivity());
+        alertDialog.setTitle("Select an option");
+        alertDialog.setSingleChoiceItems(imageIntents, 0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch (i) {
+                    case 0:
+                        choices.clear();
+                        choices.add(0);
+                        break;
+
+                    case 1:
+                        choices.clear();
+                        choices.add(1);
+                        break;
+                }
+            }
+        });
+
+        alertDialog.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch (choices.get(0)){
+                    case 0:
+                        dispatchTakePictureIntent();
+                        break;
+
+                    case 1:
+                        chooseImage();
+                        break;
+
+                }
+            }
+        });
+
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        });
+
+        dialog = alertDialog.create();
 
         ref = FirebaseDatabase.getInstance().getReference().child("styles");
 
@@ -350,20 +466,21 @@ public class RegisterStyleFragment extends Fragment {
             }
         });
 
-        stylePhoto.setOnClickListener(new View.OnClickListener() {
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                dispatchTakePictureIntent();
-                chooseImage();
+                dialog.show();
             }
         });
+
+
 
     }
 
     public String setPriceRange(long cost, String gender){
         String priceRange = "0";
-        String femalePriceRanges[] = getResources().getStringArray(R.array.price_ranges_female);
-        String malePriceRanges[] = getResources().getStringArray(R.array.price_ranges_male);
+        String[] femalePriceRanges = getResources().getStringArray(R.array.price_ranges_female);
+        String[] malePriceRanges = getResources().getStringArray(R.array.price_ranges_male);
 
         if(gender.equals("female")){
             if(cost >= 10000 && cost <= 15000){

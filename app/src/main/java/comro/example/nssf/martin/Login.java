@@ -175,89 +175,92 @@ public class Login extends AppCompatActivity {
         loginbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressDialog.show();
-
                 password = loginPasswordTxt.getText().toString().trim();
                 email = loginEmailTxt.getText().toString().trim();
 
                 loginEmailTxt.setText("");
                 loginPasswordTxt.setText("");
 
-                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        progressDialog.dismiss();
-                        if(task.isSuccessful()){
+                if( !(password.isEmpty() && email.isEmpty()) ){
+                    progressDialog.show();
+                    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            progressDialog.dismiss();
+                            if (task.isSuccessful()) {
 
-//                            /Toast.makeText(Login.this, "success", Toast.LENGTH_SHORT).show();
-                            int unicode = 0x1F60A;
-                            String emoji = getEmojiByUnicode(unicode);
+    //                            /Toast.makeText(Login.this, "success", Toast.LENGTH_SHORT).show();
+                                int unicode = 0x1F60A;
+                                String emoji = getEmojiByUnicode(unicode);
 
-                            //set up snack bar
-                            Snackbar snackbar = Snackbar.make(relativeLayout, "Logged in successfully " + emoji, Snackbar.LENGTH_SHORT);
-                            View view = snackbar.getView();
-                            TextView mView = view.findViewById(android.support.design.R.id.snackbar_text);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                                mView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                            } else {
-                                mView.setGravity(Gravity.CENTER_HORIZONTAL);
-                            }
-                            mView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_textsize));
-                            mView.setBackgroundColor((ContextCompat.getColor(Login.this, R.color.colorPrimary)));
-                            snackbar.show();
+                                //set up snack bar
+                                Snackbar snackbar = Snackbar.make(relativeLayout, "Logged in successfully " + emoji, Snackbar.LENGTH_SHORT);
+                                View view = snackbar.getView();
+                                TextView mView = view.findViewById(android.support.design.R.id.snackbar_text);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    mView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                } else {
+                                    mView.setGravity(Gravity.CENTER_HORIZONTAL);
+                                }
+                                mView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_textsize));
+                                mView.setBackgroundColor((ContextCompat.getColor(Login.this, R.color.colorPrimary)));
+                                snackbar.show();
 
-                            final DatabaseReference ref =  FirebaseDatabase.getInstance().getReference().child("customers");
-                            final Boolean[] exists = new Boolean[1];
-                            final String userId = auth.getCurrentUser().getUid();
-                            final String email = auth.getCurrentUser().getEmail();
+                                final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("customers");
+                                final Boolean[] exists = new Boolean[1];
+                                final String userId = auth.getCurrentUser().getUid();
+                                final String email = auth.getCurrentUser().getEmail();
 
-                            ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    exists[0] = false;
-                                    for(DataSnapshot snapshot : dataSnapshot.getChildren()){
-                                       // Log.d("user id", userId);
-                                        if(snapshot.child("email").getValue().toString().equals(email)){
-                                            exists[0] = true;
-                                            break;
+                                ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        exists[0] = false;
+                                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                            // Log.d("user id", userId);
+                                            if (snapshot.child("email").getValue().toString().equals(email)) {
+                                                exists[0] = true;
+                                                break;
+                                            }
+                                            //Log.d("value of exist1", exists[0].toString());
                                         }
-                                        //Log.d("value of exist1", exists[0].toString());
-                                    }
-//                                    exists[0] = dataSnapshot.child("customers").child(userId).exists();
+    //                                    exists[0] = dataSnapshot.child("customers").child(userId).exists();
 
-                                    Log.d("value of exist", exists[0].toString());
-                                    if(exists[0].equals(true)){
-                                        startActivity(new Intent(Login.this, CustomerMainPage.class));
-                                        finish();
+                                        Log.d("value of exist", exists[0].toString());
+                                        if (exists[0].equals(true)) {
+                                            startActivity(new Intent(Login.this, CustomerMainPage.class));
+                                            finish();
+                                        } else {
+                                            startActivity(new Intent(Login.this, StylistMainPage.class));
+                                            finish();
+                                        }
                                     }
-                                    else{
-                                        startActivity(new Intent(Login.this, StylistMainPage.class));
-                                        finish();
-                                    }
-                                }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-                                }
-                            });
-                        }
-                        else{
-                            int unicode = 0x1F629;
-                            String emoji = getEmojiByUnicode(unicode);
-                            Snackbar snackbar = Snackbar.make(relativeLayout, emoji + " " +task.getException().getMessage(), Snackbar.LENGTH_LONG);
-                            View view = snackbar.getView();
-                            TextView mView = view.findViewById(android.support.design.R.id.snackbar_text);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                                mView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    }
+                                });
                             } else {
-                                mView.setGravity(Gravity.CENTER_HORIZONTAL);
+                                int unicode = 0x1F629;
+                                String emoji = getEmojiByUnicode(unicode);
+                                Snackbar snackbar = Snackbar.make(relativeLayout, emoji + " " + task.getException().getMessage(), Snackbar.LENGTH_LONG);
+                                View view = snackbar.getView();
+                                TextView mView = view.findViewById(android.support.design.R.id.snackbar_text);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    mView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                } else {
+                                    mView.setGravity(Gravity.CENTER_HORIZONTAL);
+                                }
+                                mView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_textsize));
+                                mView.setBackgroundColor((ContextCompat.getColor(Login.this, R.color.colorPrimary)));
+                                snackbar.show();
                             }
-                            mView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.snackbar_textsize));
-                            mView.setBackgroundColor((ContextCompat.getColor(Login.this, R.color.colorPrimary)));
-                            snackbar.show();
                         }
-                    }
-                });
+                    });
+                }
+                else {
+                    loginPasswordTxt.setError("password can't be empty");
+                    loginEmailTxt.setError("email can't be empty");
+                }
             }
         });
 

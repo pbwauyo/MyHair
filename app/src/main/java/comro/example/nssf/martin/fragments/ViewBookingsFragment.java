@@ -26,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import comro.example.nssf.martin.ChatActivity;
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.adapters.BookingsAdapter;
 import comro.example.nssf.martin.dataModels.Booking;
@@ -144,8 +145,9 @@ public class ViewBookingsFragment extends Fragment {
                     styleName = snapshot.child("styleName").getValue().toString();
                     id = snapshot.child("messageId").getValue().toString();
                     contact = snapshot.child("senderContact").getValue().toString();
+                    String senderId = snapshot.child("senderId").getValue().toString();
 
-                    booking = new Booking(stylImage, cusName, styleName, status, id, contact);
+                    booking = new Booking(stylImage, cusName, styleName, status, id, contact, senderId);
                     bookingsList.add(booking);
                 }
 
@@ -167,7 +169,11 @@ public class ViewBookingsFragment extends Fragment {
 
                     @Override
                     public void onChatButtonClick(View view, int position) {
-
+                        Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+                        chatIntent.putExtra("receiverAccountType", "customers");
+                        chatIntent.putExtra("senderAccountType", "stylists");
+                        chatIntent.putExtra("receiverId", bookingsList.get(position).getCustomerId());
+                        startActivity(chatIntent);
                     }
 
                     @Override

@@ -20,6 +20,12 @@ public class Style implements Serializable{
         this.salonId = salonId;
     }
 
+    public Style(String name, String cost, String image) {
+        this.name = name;
+        this.cost = cost;
+        this.image = image;
+    }
+
     public String getName() {
         return name;
     }

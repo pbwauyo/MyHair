@@ -1,15 +1,16 @@
 package comro.example.nssf.martin.dataModels;
 
 public class Booking {
-    private String styleImage, customerName, styleName, status, id, phoneNumber;
+    private String styleImage, customerName, styleName, status, id, phoneNumber, customerId;
 
-    public Booking(String styleImage, String customerName, String styleName, String status, String id, String phoneNumber) {
+    public Booking(String styleImage, String customerName, String styleName, String status, String id, String phoneNumber, String customerId) {
         this.styleImage = styleImage;
         this.customerName = customerName;
         this.styleName = styleName;
         this.status = status;
         this.id = id;
         this.phoneNumber = phoneNumber;
+        this.customerId = customerId;
     }
 
     public String getStyleImage() {
@@ -58,5 +59,13 @@ public class Booking {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 }

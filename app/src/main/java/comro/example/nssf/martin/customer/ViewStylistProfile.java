@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,23 +19,28 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.dataModels.Message;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ViewStylistProfile extends AppCompatActivity {
     private String stylistId;
-    private ImageView profilePic;
+    private CircleImageView profilePic;
     private RatingBar ratingBar;
     private TextView nameTxt, stylesTxt, followersTxt, emailTxt, phoneTxt, locationTxt ;
     private Button followBtn, requestBtn;
-    private String name, styles, followers, email, phone, location, rating, profileP;
+    private String name, styles, followers, email, phone, location, rating;
     private String currentUserId;
     private String requestId;
     private String stylistName, styleName;
     private String senderName, imageUrl, styleImg, stylistContact;
     private DatabaseReference notifRef, detailsRef, followingRef;
     private Message message;
+    private ProgressBar progressBar;
+    private LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +58,10 @@ public class ViewStylistProfile extends AppCompatActivity {
         requestBtn = findViewById(R.id.request_btn);
         ratingBar = findViewById(R.id.rating);
 
+        linearLayout = findViewById(R.id.styles_layout);
+
+        progressBar = findViewById(R.id.arrowProgressBar);
+
         Intent intent = getIntent();
         stylistId = intent.getStringExtra("stylist_id");
         stylistName = intent.getStringExtra("stylist_name");
@@ -61,6 +72,15 @@ public class ViewStylistProfile extends AppCompatActivity {
 
         followingRef = FirebaseDatabase.getInstance().getReference();
         notifRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(stylistId).child("notifications").child("requests");
+
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent stylesIntent = new Intent(ViewStylistProfile.this, ViewAllStyles.class);
+                stylesIntent.putExtra("stylist_id", stylistId);
+                startActivity(stylesIntent);
+            }
+        });
 
         //check if customer is following stylist
         detailsRef = FirebaseDatabase.getInstance().getReference().child("customers").child(currentUserId);
@@ -88,14 +108,37 @@ public class ViewStylistProfile extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //try to load profile image only if node exists
+                if(dataSnapshot.child("imageUrl").exists()){
+                    String imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
+                    if(!imageUrl.isEmpty()){
+                        profilePic.setVisibility(View.GONE);
+                        progressBar.setVisibility(View.VISIBLE);
+                        //load profile picture into profile page ImageView
+                        Picasso.get()
+                                .load(imageUrl)
+                                .fit()
+                                .centerCrop()
+                                .rotate(90)
+                                .into(profilePic, new Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        progressBar.setVisibility(View.GONE);
+                                        profilePic.setVisibility(View.VISIBLE);
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e) {
+
+                                    }
+                                });
+                    }
+                }
+
                 name = dataSnapshot.child("name").getValue().toString();
                 email = dataSnapshot.child("email").getValue().toString();
                 phone = dataSnapshot.child("contact").getValue().toString();
                 location = dataSnapshot.child("location").getValue().toString();
-
-                //to be implemented
-//                profileP = dataSnapshot.child("").getValue().toString();
-//                styles = dataSnapshot.child("").getValue().toString();
 
                 nameTxt.setText(name);
                 emailTxt.setText(email);
@@ -119,15 +162,6 @@ public class ViewStylistProfile extends AppCompatActivity {
                     rating = dataSnapshot.child("rating").getValue().toString();
                     ratingBar.setRating(Float.parseFloat(rating));
                 }
-
-                //set number of styles
-                if(!dataSnapshot.child("styles_number").exists()){
-                    stylesTxt.setText("0");
-                }
-                else{
-                    styles = dataSnapshot.child("styles_number").getValue().toString();
-                    stylesTxt.setText(styles);
-                }
             }
 
             @Override
@@ -147,7 +181,7 @@ public class ViewStylistProfile extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         senderName = dataSnapshot.child("name").getValue().toString();
                         String senderNumber = dataSnapshot.child("contact").getValue().toString();
-                        if(dataSnapshot.child("imageUrl").exists()) {
+                        if(dataSnapshot.child("imageUrl").exists() && !dataSnapshot.child("imageUrl").getValue().toString().isEmpty()) {
                             imageUrl = dataSnapshot.child("imageUrl").getValue().toString();
                             message = new Message("hair request", senderName, currentUserId, imageUrl, stylistName, stylistId, requestId, "", styleName, styleImg, senderNumber, stylistContact);
                         }

@@ -10,10 +10,17 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/info_box_image"
             android:layout_width="70dp"
             android:layout_height="70dp" />
+        <ProgressBar
+            android:id="@+id/arrowProgressBar"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminateDrawable="@drawable/my_wheel" />
 
         <LinearLayout
             android:layout_width="wrap_content"

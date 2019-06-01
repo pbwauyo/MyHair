@@ -93,8 +93,6 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
 
                     location[0] = new LatLng(latitude, longitude);
 
-//                    markerOptions.alpha(0.7f);
-//                    markerOptions.title(name);
                     markerOptions.position(location[0]);
                     marker[0] = mMap.addMarker(markerOptions);
 
@@ -113,7 +111,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
                 for (Marker marker : markers.values()) {
                     builder.include(marker.getPosition());
                 }
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
             }
 
             @Override

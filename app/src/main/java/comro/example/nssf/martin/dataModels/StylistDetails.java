@@ -1,16 +1,15 @@
 package comro.example.nssf.martin.dataModels;
 
 public class StylistDetails {
-    private String name, email, contact, location, pswd, time;
+    private String name, email, contact, pswd, time;
 
     public StylistDetails() {
     }
 
-    public StylistDetails(String name, String email, String contact, String location, String pswd, String time) {
+    public StylistDetails(String name, String email, String contact,  String pswd, String time) {
         this.name = name;
         this.email = email;
         this.contact = contact;
-        this.location = location;
         this.pswd = pswd;
         this.time = time;
     }
@@ -37,14 +36,6 @@ public class StylistDetails {
 
     public void setContact(String contact) {
         this.contact = contact;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public String getPswd() {

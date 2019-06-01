@@ -1,15 +1,16 @@
 package comro.example.nssf.martin.dataModels;
 
 public class HairRequest {
-    private String styleImageUrl, stylistName, styleName, phoneNumber, id, status;
+    private String styleImageUrl, stylistName, styleName, phoneNumber, id, status, stylistId;
 
-    public HairRequest(String styleImageUrl, String stylistName, String styleName, String phoneNumber, String id, String status) {
+    public HairRequest(String styleImageUrl, String stylistName, String styleName, String phoneNumber, String id, String status, String stylistId) {
         this.styleImageUrl = styleImageUrl;
         this.stylistName = stylistName;
         this.styleName = styleName;
         this.phoneNumber = phoneNumber;
         this.id = id;
         this.status = status;
+        this.stylistId = stylistId;
     }
 
     public String getStyleImageUrl() {
@@ -58,5 +59,13 @@ public class HairRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getStylistId() {
+        return stylistId;
+    }
+
+    public void setStylistId(String stylistId) {
+        this.stylistId = stylistId;
     }
 }

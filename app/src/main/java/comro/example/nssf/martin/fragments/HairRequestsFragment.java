@@ -25,6 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import comro.example.nssf.martin.ChatActivity;
 import comro.example.nssf.martin.R;
 import comro.example.nssf.martin.adapters.HairRequestAdapter;
 import comro.example.nssf.martin.dataModels.HairRequest;
@@ -134,15 +135,20 @@ public class HairRequestsFragment extends Fragment {
                     phoneNumber = snapshot.child("senderContact").getValue().toString();
                     id = snapshot.child("messageId").getValue().toString();
                     status = snapshot.child("status").getValue().toString();
+                    String stylistId = snapshot.child("senderId").getValue().toString();
 
-                    hairRequest = new HairRequest(styleImageUrl, stylistName, styleName, phoneNumber, id, status);
+                    hairRequest = new HairRequest(styleImageUrl, stylistName, styleName, phoneNumber, id, status, stylistId);
                     hairRequests.add(hairRequest);
                 }
 
                 adapter = new HairRequestAdapter(hairRequests, getActivity(), new HairRequestAdapter.OnItemClickListener() {
                     @Override
                     public void onChatButtonClick(View view, int position) {
-
+                        Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
+                        chatIntent.putExtra("receiverAccountType", "stylists");
+                        chatIntent.putExtra("senderAccountType", "customers");
+                        chatIntent.putExtra("receiverId", hairRequests.get(position).getStylistId());
+                        startActivity(chatIntent);
                     }
 
                     @Override

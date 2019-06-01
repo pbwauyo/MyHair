@@ -87,4 +87,6 @@
     <string name="title_activity_stylists_map">Map</string>
     <string name="chat">CHAT</string>
     <string name="call">CALL</string>
+    <string name="send">SEND</string>
+    <string name="typing">typing...</string>
 </resources>

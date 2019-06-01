@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/D:/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/social/ic_person_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/D:/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/toggle/ic_star_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -33,12 +33,10 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="141414" />
-                            <entry key="height" value="80" />
-                            <entry key="outputName" value="ic_default_dp" />
+                            <entry key="color" value="d1cc1f" />
+                            <entry key="outputName" value="ic_star_yellow" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\Peter Brayo" />
-                            <entry key="width" value="80" />
                           </map>
                         </option>
                       </PersistentState>

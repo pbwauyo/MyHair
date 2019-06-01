@@ -38,7 +38,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -76,12 +75,14 @@ public class CustomerProfileFragment extends Fragment {
     private String mParam2;
 
     private Toolbar toolbar;
-    private ImageView profilePicView, editName;
+    private ImageView profilePicView;
     private FloatingActionButton editPicFab;
     private TextView emailTxt, phoneNoTxt, locationTxt, nameTxt;
-    private EditText newNameTxt;
+    private EditText editNameTxt;
     protected Location lastLocation;
     private String currentPhotoPath;
+    private EditText editEmailTxt, editNumberTxt;
+
     CoordinatorLayout coordinatorLayout;
     String userId, dpUrl;
     DatabaseReference detailsRef, customersRef;
@@ -97,6 +98,10 @@ public class CustomerProfileFragment extends Fragment {
     private ArrayList<Integer> recommendations = new ArrayList<>();
 
     private StorageReference profileImageRef;
+
+    private ImageView confirmName, confirmEmail, confirmNumber, changeName, changeEmail, changeNumber, locationPin;
+
+    private ImageView cancelName, cancelNumber, cancelEmail;
 
     public CustomerProfileFragment() {
         // Required empty public constructor
@@ -175,10 +180,27 @@ public class CustomerProfileFragment extends Fragment {
         emailTxt = view.findViewById(R.id.customer_profile_email);
         phoneNoTxt = view.findViewById(R.id.customer_profile_number);
         locationTxt = view.findViewById(R.id.customer_profile_location);
-        editName = view.findViewById(R.id.edit_name);
         progressBar = view.findViewById(R.id.progress_bar);
         arrowProgressBar = view.findViewById(R.id.arrowProgressBar);
-        newNameTxt = view.findViewById(R.id.edit_customer_profile_name);
+
+        locationPin = view.findViewById(R.id.location_pin);
+
+        editNameTxt = view.findViewById(R.id.edit_customer_profile_name);
+        editEmailTxt = view.findViewById(R.id.edit_customer_profile_email);
+        editNumberTxt = view.findViewById(R.id.edit_customer_profile_number);
+
+        changeName = view.findViewById(R.id.change_name);
+        changeEmail = view.findViewById(R.id.change_email);
+        changeNumber = view.findViewById(R.id.change_number);
+
+        confirmName = view.findViewById(R.id.done_edit_name);
+        confirmEmail = view.findViewById(R.id.done_edit_email);
+        confirmNumber = view.findViewById(R.id.done_edit_number);
+
+        cancelName = view.findViewById(R.id.cancel_edit_name);
+        cancelEmail = view.findViewById(R.id.cancel_edit_email);
+        cancelNumber = view.findViewById(R.id.cancel_edit_number);
+
         coordinatorLayout = view.findViewById(R.id.coordinator_layout);
 
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
@@ -217,11 +239,135 @@ public class CustomerProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        editName.setOnClickListener(new View.OnClickListener() {
+        changeName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 nameTxt.setVisibility(View.GONE);
-                newNameTxt.setVisibility(View.VISIBLE);
+                editNameTxt.setVisibility(View.VISIBLE);
+                changeName.setVisibility(View.GONE);
+                confirmName.setVisibility(View.VISIBLE);
+                cancelName.setVisibility(View.VISIBLE);
+            }
+        });
+
+        confirmName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newName = editNameTxt.getText().toString();
+
+                if(!newName.isEmpty()) {
+                    editNameTxt.setVisibility(View.GONE);
+                    nameTxt.setVisibility(View.VISIBLE);
+                    confirmName.setVisibility(View.GONE);
+                    changeName.setVisibility(View.VISIBLE);
+                    cancelName.setVisibility(View.GONE);
+
+                    detailsRef.child("name").setValue(newName);
+                }
+                else {
+                    Snackbar.make(coordinatorLayout, "Please input a name", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cancelName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editNameTxt.setVisibility(View.GONE);
+                nameTxt.setVisibility(View.VISIBLE);
+                confirmName.setVisibility(View.GONE);
+                changeName.setVisibility(View.VISIBLE);
+                cancelName.setVisibility(View.GONE);
+            }
+        });
+
+        changeNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                phoneNoTxt.setVisibility(View.GONE);
+                editNumberTxt.setVisibility(View.VISIBLE);
+                changeNumber.setVisibility(View.GONE);
+                confirmNumber.setVisibility(View.VISIBLE);
+                cancelNumber.setVisibility(View.VISIBLE);
+            }
+        });
+
+        confirmNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newNumber = editNumberTxt.getText().toString();
+                if(!newNumber.isEmpty()) {
+                    editNumberTxt.setVisibility(View.GONE);
+                    phoneNoTxt.setVisibility(View.VISIBLE);
+                    confirmNumber.setVisibility(View.GONE);
+                    changeNumber.setVisibility(View.VISIBLE);
+                    cancelNumber.setVisibility(View.GONE);
+
+                    detailsRef.child("contact").setValue(newNumber);
+                }
+                else {
+                    Snackbar.make(coordinatorLayout, "Please input a number", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cancelNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editNumberTxt.setVisibility(View.GONE);
+                phoneNoTxt.setVisibility(View.VISIBLE);
+                confirmNumber.setVisibility(View.GONE);
+                changeNumber.setVisibility(View.VISIBLE);
+                cancelNumber.setVisibility(View.GONE);
+            }
+        });
+
+        changeEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                emailTxt.setVisibility(View.GONE);
+                editEmailTxt.setVisibility(View.VISIBLE);
+                changeEmail.setVisibility(View.GONE);
+                confirmEmail.setVisibility(View.VISIBLE);
+                cancelEmail.setVisibility(View.VISIBLE);
+            }
+        });
+
+        confirmEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newEmail = editEmailTxt.getText().toString();
+
+                if(!newEmail.isEmpty()) {
+                    editEmailTxt.setVisibility(View.GONE);
+                    emailTxt.setVisibility(View.VISIBLE);
+                    confirmEmail.setVisibility(View.GONE);
+                    changeEmail.setVisibility(View.VISIBLE);
+                    cancelEmail.setVisibility(View.GONE);
+
+                    detailsRef.child("email").setValue(newEmail);
+                }
+                else {
+                    Snackbar.make(coordinatorLayout, "Please input an email", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cancelEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editEmailTxt.setVisibility(View.GONE);
+                emailTxt.setVisibility(View.VISIBLE);
+                confirmEmail.setVisibility(View.GONE);
+                changeEmail.setVisibility(View.VISIBLE);
+                cancelEmail.setVisibility(View.GONE);
+            }
+        });
+
+        locationPin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(coordinatorLayout, "Your location", Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -373,7 +519,7 @@ public class CustomerProfileFragment extends Fragment {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Snackbar.make(coordinatorLayout, ex.getMessage(), Snackbar.LENGTH_LONG);
+                Snackbar.make(coordinatorLayout, ex.getMessage(), Snackbar.LENGTH_LONG).show();
 
             }
             // Continue only if the File was successfully created
@@ -394,7 +540,7 @@ public class CustomerProfileFragment extends Fragment {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             File file = new File(currentPhotoPath);
             Uri uri = Uri.fromFile(file);
-            UtilityFunctions.uploadProfileImage(profileImageRef, uri, coordinatorLayout, progressBar, customersRef, userId);
+            UtilityFunctions.uploadImage(profileImageRef, uri, coordinatorLayout, progressBar, customersRef, userId);
         }
     }
 

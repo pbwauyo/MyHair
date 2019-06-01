@@ -81,8 +81,6 @@ public class SearchFragment extends Fragment {
     private Toolbar toolbar;
     private CoordinatorLayout coordinatorLayout;
     private static final int PERMISSIONS_REQUEST = 1;
-    private SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
     private CurrentLocation currentLocation;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
@@ -157,17 +155,7 @@ public class SearchFragment extends Fragment {
 
         checkPermissions();
 
-//        LocationManager lm = (LocationManager) (getActivity()).getSystemService(LOCATION_SERVICE);
-
         storageReference = FirebaseStorage.getInstance().getReference().child(userId).child("style_image");
-
-
-//        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-//            Toast.makeText(getActivity(), "Please enable location services", Toast.LENGTH_SHORT).show();
-////            getActivity().finish();
-//        }
-
-
     }
 
     @Override
@@ -260,131 +248,120 @@ public class SearchFragment extends Fragment {
                 selectedPrice = pricesSpinner.getSelectedItem().toString().trim();
                 location = locationTxt.getText().toString().toLowerCase().trim();
 
-                //if location is input
-                if(!location.isEmpty()) {
-                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            customerStyles = dataSnapshot.child("styles").getChildren();
-                            for (DataSnapshot ds : customerStyles) {
-                                gender = ds.child("styleGender").getValue().toString();
-                                style = ds.child("styleName").getValue().toString().toLowerCase();
-                                price = ds.child("price_range").getValue().toString();
-                                imageUrl = ds.child("imageUrl").getValue().toString();
-                                id = ds.child("stylistId").getValue().toString();
-                                salonId = ds.child("salonId").getValue().toString();
+                if(!selectedStyle.isEmpty()) {
+                    //if location is input
+                    if (!location.isEmpty()) {
+                        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                customerStyles = dataSnapshot.child("styles").getChildren();
+                                for (DataSnapshot ds : customerStyles) {
+                                    gender = ds.child("styleGender").getValue().toString();
+                                    style = ds.child("styleName").getValue().toString().toLowerCase();
+                                    price = ds.child("price_range").getValue().toString();
+                                    imageUrl = ds.child("imageUrl").getValue().toString();
+                                    id = ds.child("stylistId").getValue().toString();
+                                    salonId = ds.child("salonId").getValue().toString();
 
-                                boolean styleExists = selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price);
+                                    boolean styleExists = selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price);
 
-                                if (styleExists) {
-                                    boolean locationMatch = dataSnapshot.child("stylists").child(id).child("salons_details").child(salonId).child("address").getValue().toString().toLowerCase().contains(location);
-                                    if(locationMatch){
-                                        Style snapshotStyle = new Style(style, gender, price, imageUrl, id, salonId);
-                                        arrayList.add(snapshotStyle);
+                                    if (styleExists) {
+                                        boolean locationMatch = dataSnapshot.child("stylists").child(id).child("salons_details").child(salonId).child("address").getValue().toString().toLowerCase().contains(location);
+                                        if (locationMatch) {
+                                            Style snapshotStyle = new Style(style, gender, price, imageUrl, id, salonId);
+                                            arrayList.add(snapshotStyle);
+                                        }
                                     }
                                 }
-                            }
-                            //if arrayList contains some records, start MapActivity with the arrayList as Extras
-                            if(arrayList.size()!=0){
-                                Intent intent = new Intent(getContext(), StylistsMapView.class);
-                                bundle.putSerializable("styles",  arrayList);
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                                getActivity().finish();
-                            }
-                            else{
-                                Snackbar.make(coordinatorLayout, "Style doesn't exist", Snackbar.LENGTH_LONG).show();
+                                //if arrayList contains some records, start MapActivity with the arrayList as Extras
+                                if (arrayList.size() != 0) {
+                                    Intent intent = new Intent(getContext(), StylistsMapView.class);
+                                    bundle.putSerializable("styles", arrayList);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                    getActivity().finish();
+                                } else {
+                                    Snackbar.make(coordinatorLayout, "Style doesn't exist", Snackbar.LENGTH_LONG).show();
+                                }
+
                             }
 
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                        }
-                    });
+                            }
+                        });
+                    }
+
+                    // if no location was input
+                    else {
+                        ref.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                arrayList = new ArrayList<>();
+                                bundle = new Bundle();
+                                customerStyles = dataSnapshot.child("styles").getChildren();
+
+                                for (DataSnapshot ds : customerStyles) {
+                                    gender = ds.child("styleGender").getValue().toString();
+                                    style = ds.child("styleName").getValue().toString().toLowerCase();
+                                    price = ds.child("price_range").getValue().toString();
+                                    imageUrl = ds.child("imageUrl").getValue().toString();
+                                    id = ds.child("stylistId").getValue().toString();
+                                    salonId = ds.child("salonId").getValue().toString();
+
+                                    boolean styleExists = selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price);
+
+                                    if (styleExists) {
+                                        double latitude = Double.parseDouble(dataSnapshot.child("stylists").child(id).child("salons_details").child(salonId).child("latitude").getValue().toString());
+                                        double longitude = Double.parseDouble(dataSnapshot.child("stylists").child(id).child("salons_details").child(salonId).child("longitude").getValue().toString());
+                                        double distanceBetween;
+
+                                        //start point
+                                        Location start = new Location("start");
+                                        start.setLatitude(currentLocation.getLatitude());
+                                        start.setLongitude(currentLocation.getLongitude());
+
+                                        //stop point
+                                        Location stop = new Location("stop");
+                                        stop.setLatitude(latitude);
+                                        stop.setLongitude(longitude);
+
+                                        //distance between
+                                        distanceBetween = start.distanceTo(stop);
+
+                                        if (distanceBetween <= 50000) {
+                                            Style snapshotStyle = new Style(style, gender, price, imageUrl, id, salonId);
+                                            arrayList.add(snapshotStyle);
+                                        }
+                                    }
+                                }
+
+                                //if there're records in the arrayList
+                                if (arrayList.size() != 0) {
+                                    Intent intent = new Intent(getContext(), StylistsMapView.class);
+                                    bundle.putSerializable("styles", arrayList);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                    getActivity().finish();
+                                } else {
+                                    Snackbar.make(coordinatorLayout, "Style doesn't exist", Snackbar.LENGTH_LONG).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    }
                 }
-
-                // if no location was input
-                else {
-                    ref.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            arrayList = new ArrayList<>();
-                            bundle = new Bundle();
-                            customerStyles = dataSnapshot.child("styles").getChildren();
-
-                            for (DataSnapshot ds : customerStyles) {
-                                gender = ds.child("styleGender").getValue().toString();
-                                style = ds.child("styleName").getValue().toString().toLowerCase();
-                                price = ds.child("price_range").getValue().toString();
-                                imageUrl = ds.child("imageUrl").getValue().toString();
-                                id = ds.child("stylistId").getValue().toString();
-                                salonId = ds.child("salonId").getValue().toString();
-
-                                boolean styleExists = selectedGender.equals(gender) && selectedStyle.equals(style) && selectedPrice.equals(price);
-
-                                if (styleExists) {
-                                    double latitude = Double.parseDouble(dataSnapshot.child("stylists").child(id).child("salons_details").child(salonId).child("latitude").getValue().toString());
-                                    double longitude = Double.parseDouble(dataSnapshot.child("stylists").child(id).child("salons_details").child(salonId).child("longitude").getValue().toString());
-                                    double distanceBetween;
-
-                                    //start point
-                                    Location start = new Location("start");
-                                    start.setLatitude(currentLocation.getLatitude());
-                                    start.setLongitude(currentLocation.getLongitude());
-
-                                    //stop point
-                                    Location stop = new Location("stop");
-                                    stop.setLatitude(latitude);
-                                    stop.setLongitude(longitude);
-
-                                    //distance between
-                                    distanceBetween = start.distanceTo(stop);
-
-                                    if(distanceBetween <= 50000){
-                                        Style snapshotStyle = new Style(style, gender, price, imageUrl, id, salonId);
-                                        arrayList.add(snapshotStyle);
-                                    }
-                                }
-                            }
-
-                            //if there're records in the arrayList
-                            if(arrayList.size() != 0 ){
-                                Intent intent = new Intent(getContext(), StylistsMapView.class);
-                                bundle.putSerializable("styles",  arrayList);
-                                intent.putExtras(bundle);
-                                startActivity(intent);
-                                getActivity().finish();
-                            }
-                            else{
-                                Snackbar.make(coordinatorLayout, "Style doesn't exist", Snackbar.LENGTH_LONG).show();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
+                else{
+                    Snackbar.make(coordinatorLayout, "please enter the style name", Snackbar.LENGTH_LONG).show();
                 }
 
             }
         });
-    }
-
-
-    public void saveArrayList (ArrayList<Style> arrayList, String key){
-        Gson gson = new Gson();
-        String json = gson.toJson(arrayList);
-        editor.putString(key, json);
-        editor.commit();
-    }
-
-    public ArrayList<Style> getArrayList(String key){
-        Gson gson = new Gson();
-        String list = sharedPreferences.getString(key, null);
-        Type type = new TypeToken<ArrayList<Style>>(){}.getType();
-        return gson.fromJson(list, type);
     }
 
     @Override
@@ -490,8 +467,4 @@ public class SearchFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
     }
-
-    //    public void searchStyle(){
-//
-//        }
-    }
+}

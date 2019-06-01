@@ -58,7 +58,6 @@ public class CustomerSignUp extends AppCompatActivity {
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressDialog.show();
                 name = nameTxt.getText().toString().trim();
                 email = emailTxt.getText().toString().trim();
                 contact = contactTxt.getText().toString().trim();
@@ -71,28 +70,32 @@ public class CustomerSignUp extends AppCompatActivity {
                 pswdTxt.setText("");
                 confirmPswdTxt.setText("");
 
-                if(pswd.equals(confirmPswd)) {
-                    auth.createUserWithEmailAndPassword(email, pswd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            progressDialog.dismiss();
-                            if(task.isSuccessful()){
-                                Toast.makeText(CustomerSignUp.this, "User created successfully", Toast.LENGTH_LONG).show();
-                                String userId = auth.getCurrentUser().getUid();
-                                CustomerDetails customerDetails = new CustomerDetails(name, email, contact, pswd);
-                                ref.child(userId).setValue(customerDetails);
-                                startActivity(new Intent(CustomerSignUp.this, Login.class));
+                if (!(name.isEmpty() && email.isEmpty() && contact.isEmpty() && pswd.isEmpty() && confirmPswd.isEmpty())) {
+                    progressDialog.show();
+                    if (pswd.equals(confirmPswd)) {
+                        auth.createUserWithEmailAndPassword(email, pswd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                progressDialog.dismiss();
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(CustomerSignUp.this, "User created successfully", Toast.LENGTH_LONG).show();
+                                    String userId = auth.getCurrentUser().getUid();
+                                    CustomerDetails customerDetails = new CustomerDetails(name, email, contact, pswd);
+                                    ref.child(userId).setValue(customerDetails);
+                                    startActivity(new Intent(CustomerSignUp.this, Login.class));
+                                } else {
+                                    Toast.makeText(CustomerSignUp.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                }
                             }
-                            else{
-                                Toast.makeText(CustomerSignUp.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
+                        });
 
+                    } else {
+                        progressDialog.dismiss();
+                        confirmPswdTxt.setError("passwords don't match");
+                    }
                 }
                 else {
-                    progressDialog.dismiss();
-                    Toast.makeText(CustomerSignUp.this, "Invalid username or password", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CustomerSignUp.this, "please fill in all fields", Toast.LENGTH_LONG).show();
                 }
             }
         });

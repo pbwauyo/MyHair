@@ -23,10 +23,10 @@ import comro.example.nssf.martin.Login;
 
 public class StylistSignUp extends AppCompatActivity  {
 
-    private EditText nameTxt, emailTxt, contactTxt, locationTxt, pswdTxt, confirmPswdTxt;
+    private EditText nameTxt, emailTxt, contactTxt, pswdTxt, confirmPswdTxt;
     private FirebaseDatabase database;
     private TextView save, login;
-    private String name, email, contact, location, pswd, confirmPswd, time;
+    private String name, email, contact, pswd, confirmPswd, time;
     private FirebaseAuth auth;
     private ProgressDialog progressDialog;
 
@@ -39,7 +39,6 @@ public class StylistSignUp extends AppCompatActivity  {
         nameTxt = findViewById(R.id.stylist_name);
         emailTxt = findViewById(R.id.stylist_email);
         contactTxt = findViewById(R.id.stylist_phone);
-        locationTxt = findViewById(R.id.stylist_location);
         pswdTxt = findViewById(R.id.stylistPassword);
         confirmPswdTxt = findViewById(R.id.stylistConfirmpassword);
         save = findViewById(R.id.save_stylist_info);
@@ -59,43 +58,45 @@ public class StylistSignUp extends AppCompatActivity  {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressDialog.show();
                 name = nameTxt.getText().toString().trim();
                 email = emailTxt.getText().toString().trim();
                 contact = contactTxt.getText().toString().trim();
-                location = locationTxt.getText().toString().trim();
                 pswd = pswdTxt.getText().toString().trim();
                 confirmPswd = confirmPswdTxt.getText().toString().trim();
 
                 nameTxt.setText("");
                 emailTxt.setText("");
                 contactTxt.setText("");
-                locationTxt.setText("");
                 pswdTxt.setText("");
                 confirmPswdTxt.setText("");
 
-                if (pswd.equals(confirmPswd)) {
-                    auth.createUserWithEmailAndPassword(email, pswd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            progressDialog.dismiss();
-                            if (task.isSuccessful()) {
-                                String userId = auth.getCurrentUser().getUid();
-                                StylistDetails stylistDetails = new StylistDetails(name, email, contact, location, pswd, time);
-                                DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("stylists").child(userId);
-                                ref.setValue(stylistDetails);
-                                Toast.makeText(StylistSignUp.this, "User created successfully", Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(StylistSignUp.this, Login.class));
-                            } else {
-                                Toast.makeText(StylistSignUp.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                if(!(name.isEmpty() && email.isEmpty() && contact.isEmpty() && pswd.isEmpty() && confirmPswd.isEmpty())) {
+                    progressDialog.show();
+                    if (pswd.equals(confirmPswd)) {
+                        auth.createUserWithEmailAndPassword(email, pswd).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                progressDialog.dismiss();
+                                if (task.isSuccessful()) {
+                                    String userId = auth.getCurrentUser().getUid();
+                                    StylistDetails stylistDetails = new StylistDetails(name, email, contact, pswd, time);
+                                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("stylists").child(userId);
+                                    ref.setValue(stylistDetails);
+                                    Toast.makeText(StylistSignUp.this, "User created successfully", Toast.LENGTH_LONG).show();
+                                    startActivity(new Intent(StylistSignUp.this, Login.class));
+                                } else {
+                                    Toast.makeText(StylistSignUp.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                }
                             }
-                        }
-                    });
-                } else {
-                    progressDialog.dismiss();
-                    Toast.makeText(StylistSignUp.this, "Passwords do not match", Toast.LENGTH_LONG).show();
+                        });
+                    } else {
+                        progressDialog.dismiss();
+                        confirmPswdTxt.setError("passwords don't match");
+                    }
                 }
-
+                else {
+                    Toast.makeText(StylistSignUp.this, "please fill in all fields", Toast.LENGTH_LONG).show();
+                }
             }
         });
 

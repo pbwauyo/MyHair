@@ -8,8 +8,7 @@
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/search_coordinator_layout"
-        >
+        android:id="@+id/search_coordinator_layout">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/search_toolbar"
@@ -32,6 +31,7 @@
 
                 <EditText
                     android:id="@+id/styles_txt"
+                    android:imeOptions="actionNext"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="enter style name" />
@@ -46,6 +46,7 @@
 
                 <EditText
                     android:id="@+id/location_txt"
+                    android:imeOptions="actionDone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="enter location (optional)"/>

@@ -1,7 +1,6 @@
 package comro.example.nssf.martin.fragments;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v7.widget.Toolbar;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -68,6 +68,7 @@ public class StylistHomePageFragment extends Fragment {
     private FloatingActionButton editProfilePic;
     private String currentPhotoPath;
     private CoordinatorLayout coordinatorLayout;
+    private EditText editNametxt, editEmailTxt, editNumberTxt;
     FirebaseAuth auth;
     FirebaseStorage firebaseStorage;
     private DatabaseReference databaseReference, stylistsRef;
@@ -77,6 +78,8 @@ public class StylistHomePageFragment extends Fragment {
     private StorageReference profileImageRef;
     //ArrayList<String> results = new ArrayList<>();
     private String dpUrl;
+    private ImageView confirmName, confirmEmail, confirmNumber, changeName, changeEmail, changeNumber, locationPin;
+    private ImageView cancelName, cancelNumber, cancelEmail;
 
     public StylistHomePageFragment() {
         // Required empty public constructor
@@ -132,6 +135,23 @@ public class StylistHomePageFragment extends Fragment {
         arrowProgressBar = view.findViewById(R.id.arrowProgressBar);
         editProfilePic = view.findViewById(R.id.s_fab);
 
+        editNametxt = view.findViewById(R.id.edit_profile_name);
+        editEmailTxt = view.findViewById(R.id.edit_profile_email);
+        editNumberTxt = view.findViewById(R.id.edit_profile_number);
+        locationPin = view.findViewById(R.id.location_pin);
+
+        confirmName = view.findViewById(R.id.done_edit_name);
+        confirmEmail = view.findViewById(R.id.done_edit_email);
+        confirmNumber = view.findViewById(R.id.done_edit_number);
+
+        changeName = view.findViewById(R.id.change_name);
+        changeEmail = view.findViewById(R.id.change_email);
+        changeNumber = view.findViewById(R.id.change_number);
+
+        cancelName = view.findViewById(R.id.cancel_edit_name);
+        cancelEmail = view.findViewById(R.id.cancel_edit_email);
+        cancelNumber = view.findViewById(R.id.cancel_edit_number);
+
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity)(getActivity())).getSupportActionBar().setTitle("Home");
 
@@ -166,25 +186,11 @@ public class StylistHomePageFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 name = dataSnapshot.child("name").getValue().toString();
                 email = dataSnapshot.child("email").getValue().toString();
-                //location = dataSnapshot.child("locationTxt").getValue().toString();
                 phoneNo = dataSnapshot.child("contact").getValue().toString();
 
                 nameTxt.setText(name);
                 emailTxt.setText(email);
-               // locationTxt.setText(location);
                 phoneNoTxt.setText(phoneNo);
-
-                //only set image if image url exists
-//                if(dataSnapshot.child("imageUrl").exists()){
-//                    dpUrl = dataSnapshot.child("imageUrl").getValue().toString();
-//                    Picasso.get()
-//                            .load(dpUrl)
-//                            .centerCrop()
-//                            .fit()
-//                            .into(profilePic);
-//                }
-
-               // Log.d("first_name", results.get(0) + results.get(1) + results.get(2) + results.get(3));
             }
 
             @Override
@@ -206,6 +212,137 @@ public class StylistHomePageFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 dispatchTakePictureIntent();
+            }
+        });
+
+        changeName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nameTxt.setVisibility(View.GONE);
+                editNametxt.setVisibility(View.VISIBLE);
+                changeName.setVisibility(View.GONE);
+                confirmName.setVisibility(View.VISIBLE);
+                cancelName.setVisibility(View.VISIBLE);
+            }
+        });
+
+        confirmName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newName = editNametxt.getText().toString();
+                if(!newName.isEmpty()) {
+                    editNametxt.setVisibility(View.GONE);
+                    nameTxt.setVisibility(View.VISIBLE);
+                    confirmName.setVisibility(View.GONE);
+                    changeName.setVisibility(View.VISIBLE);
+                    cancelName.setVisibility(View.GONE);
+
+                    databaseReference.child("name").setValue(newName);
+                }
+                else {
+                    Snackbar.make(coordinatorLayout, "Please input a name", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cancelName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editNametxt.setVisibility(View.GONE);
+                nameTxt.setVisibility(View.VISIBLE);
+                confirmName.setVisibility(View.GONE);
+                changeName.setVisibility(View.VISIBLE);
+                cancelName.setVisibility(View.GONE);
+            }
+        });
+
+        changeEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                emailTxt.setVisibility(View.GONE);
+                editEmailTxt.setVisibility(View.VISIBLE);
+                changeEmail.setVisibility(View.GONE);
+                confirmEmail.setVisibility(View.VISIBLE);
+                cancelEmail.setVisibility(View.VISIBLE);
+            }
+        });
+
+        confirmEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newEmail = editEmailTxt.getText().toString();
+
+                if(!newEmail.isEmpty()) {
+                    editEmailTxt.setVisibility(View.GONE);
+                    emailTxt.setVisibility(View.VISIBLE);
+                    confirmEmail.setVisibility(View.GONE);
+                    changeEmail.setVisibility(View.VISIBLE);
+                    cancelEmail.setVisibility(View.GONE);
+
+                    databaseReference.child("email").setValue(newEmail);
+                }
+                else{
+                    Snackbar.make(coordinatorLayout, "Please input an email", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cancelEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editEmailTxt.setVisibility(View.GONE);
+                emailTxt.setVisibility(View.VISIBLE);
+                confirmEmail.setVisibility(View.GONE);
+                changeEmail.setVisibility(View.VISIBLE);
+                cancelEmail.setVisibility(View.GONE);
+            }
+        });
+
+        changeNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                phoneNoTxt.setVisibility(View.GONE);
+                editNumberTxt.setVisibility(View.VISIBLE);
+                changeNumber.setVisibility(View.GONE);
+                confirmNumber.setVisibility(View.VISIBLE);
+                cancelNumber.setVisibility(View.VISIBLE);
+            }
+        });
+
+        confirmNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String newNumber = editNumberTxt.getText().toString();
+                if(!newNumber.isEmpty()) {
+                    editNumberTxt.setVisibility(View.GONE);
+                    phoneNoTxt.setVisibility(View.VISIBLE);
+                    confirmNumber.setVisibility(View.GONE);
+                    changeNumber.setVisibility(View.VISIBLE);
+                    cancelNumber.setVisibility(View.GONE);
+
+                    databaseReference.child("contact").setValue(newNumber);
+                }
+                else {
+                    Snackbar.make(coordinatorLayout, "Please input a number", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cancelNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editNumberTxt.setVisibility(View.GONE);
+                phoneNoTxt.setVisibility(View.VISIBLE);
+                confirmNumber.setVisibility(View.GONE);
+                changeNumber.setVisibility(View.VISIBLE);
+                cancelNumber.setVisibility(View.GONE);
+            }
+        });
+
+        locationPin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(coordinatorLayout, "Your location", Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -292,7 +429,7 @@ public class StylistHomePageFragment extends Fragment {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             File file = new File(currentPhotoPath);
             Uri uri = Uri.fromFile(file);
-            UtilityFunctions.uploadProfileImage(profileImageRef, uri, coordinatorLayout, progressBar, stylistsRef, userId);
+            UtilityFunctions.uploadImage(profileImageRef, uri, coordinatorLayout, progressBar, stylistsRef, userId);
         }
     }
 

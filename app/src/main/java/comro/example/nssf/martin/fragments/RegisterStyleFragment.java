@@ -205,8 +205,6 @@ public class RegisterStyleFragment extends Fragment {
         //calling sync state is necessary or else your hamburger icon wont show up
         actionBarDrawerToggle.syncState();
 
-
-
         return view;
     }
 
@@ -337,7 +335,7 @@ public class RegisterStyleFragment extends Fragment {
                                     int unicode = 0x1F61A;
                                     String salonId = dataSnapshot.child(salonName).getValue().toString();
                                     DatabaseReference styleRef = databaseReference.push();
-                                    final DatabaseReference stylesNumberRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(id);
+                                   // final DatabaseReference stylesNumberRef = FirebaseDatabase.getInstance().getReference().child("stylists").child(id);
 
                                     StylistInformation stylistInformation = new StylistInformation(styleName, salonName, gender, styleCost, downloadURL, id, salonId);
 
@@ -346,24 +344,24 @@ public class RegisterStyleFragment extends Fragment {
                                     Snackbar.make(frameLayout, "Style saved successfully ".concat(getEmojiByUnicode(unicode)), Snackbar.LENGTH_LONG).show();
 
                                     //number of styles
-                                    stylesNumberRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            if(dataSnapshot.child("styles_number").exists()){
-                                                int styles = Integer.parseInt(dataSnapshot.child("styles_number").getValue().toString());
-                                                styles++;
-                                                stylesNumberRef.child("styles_number").setValue(styles);
-                                            }
-                                            else{
-                                                stylesNumberRef.child("styles_number").setValue(1);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
+//                                    stylesNumberRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                                        @Override
+//                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                                            if(dataSnapshot.child("styles_number").exists()){
+//                                                int styles = Integer.parseInt(dataSnapshot.child("styles_number").getValue().toString());
+//                                                styles++;
+//                                                stylesNumberRef.child("styles_number").setValue(styles);
+//                                            }
+//                                            else{
+//                                                stylesNumberRef.child("styles_number").setValue(1);
+//                                            }
+//                                        }
+//
+//                                        @Override
+//                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                                        }
+//                                    });
                                 }
 
                                 @Override

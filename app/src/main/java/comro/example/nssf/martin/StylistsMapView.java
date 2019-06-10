@@ -48,11 +48,6 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
         arrayList = (ArrayList<Style>) bundle.getSerializable("styles");
         Log.d("name", arrayList.get(0).getName());
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-//        toolbar = findViewById(R.id.map_toolbar);
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -90,7 +85,6 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
                     String stylistId = style.getId();
                     String phoneNo = dataSnapshot.child(stylistId).child("contact").getValue().toString();
 
-
                     location[0] = new LatLng(latitude, longitude);
 
                     markerOptions.position(location[0]);
@@ -111,7 +105,21 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
                 for (Marker marker : markers.values()) {
                     builder.include(marker.getPosition());
                 }
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
+                // if there more than 1 marker
+                if(markers.size() > 1) {
+                    /* using this method
+                       for one marker will result into
+                       an awkward zoom level */
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
+                }
+                else if(markers.size() == 1){
+                    Marker mMarker = null;
+                    for (Marker marker : markers.values()) {
+                        mMarker = marker;
+                    }
+                    // use this method for one marker instead
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mMarker.getPosition(), 15F));
+                }
             }
 
             @Override
@@ -139,6 +147,7 @@ public class StylistsMapView extends AppCompatActivity implements OnMapReadyCall
         intent.putExtra("style_image", styleImg);
         intent.putExtra("phone_number", phoneN);
         startActivity(intent);
+        finish();
     }
 
     @Override

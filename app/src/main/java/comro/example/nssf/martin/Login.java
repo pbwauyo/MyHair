@@ -82,12 +82,16 @@ public class Login extends AppCompatActivity {
             progressDialog.setCancelable(false);
             progressDialog.show();
 
-            firebaseUser = auth.getCurrentUser();
-            final String currentEmail = firebaseUser.getEmail();
+
+            firebaseUser = auth.getCurrentUser(); //get current user
+            final String currentEmail = firebaseUser.getEmail(); //get current user email
+
             stylistsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     stylistLoggedIn = false;
+
+                    //check whether theres a stylist with the email
                     for (DataSnapshot ds: dataSnapshot.getChildren()){
                         currentUserEmail = ds.child("email").getValue().toString();
                         if(currentUserEmail.equals(currentEmail)){
@@ -124,7 +128,7 @@ public class Login extends AppCompatActivity {
         // create alert dialog
         alertDialog = new AlertDialog.Builder(Login.this);
         alertDialog.setTitle("Choose account type");
-        alertDialog.setSingleChoiceItems(accountTypes, 0, new DialogInterface.OnClickListener() {
+        alertDialog.setSingleChoiceItems(accountTypes, 0, new DialogInterface.OnClickListener() { //set alert dialog items
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 switch (i) {
@@ -141,6 +145,7 @@ public class Login extends AppCompatActivity {
             }
         });
 
+        //se
         alertDialog.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -208,9 +213,9 @@ public class Login extends AppCompatActivity {
 
                                 final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("customers");
                                 final Boolean[] exists = new Boolean[1];
-                                final String userId = auth.getCurrentUser().getUid();
                                 final String email = auth.getCurrentUser().getEmail();
 
+                                //check whether customer or stylist is signed in
                                 ref.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

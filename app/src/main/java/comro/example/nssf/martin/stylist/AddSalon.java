@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.support.v7.widget.Toolbar;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -107,11 +108,12 @@ public class AddSalon extends AppCompatActivity {
 
                     DatabaseReference salonDetailsRef = databaseReference.child("salons_details");
                     DatabaseReference salonIdsRef = FirebaseDatabase.getInstance().getReference();
-                    String salonId = databaseReference.child("salons_details").push().getKey();
+                    String salonId = databaseReference.push().getKey();
 
                     salonDetailsRef.child(salonId).setValue(new Salon(name, address, currentLocation.getLatitude(), currentLocation.getLongitude(), salonId));
                     databaseReference.child("salon_names").push().setValue(name);
                     salonIdsRef.child("salonIds").child(name).setValue(salonId);
+                    Toast.makeText(AddSalon.this, "Salon details uploaded successfully", Toast.LENGTH_SHORT).show();
 
                     ref.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -127,7 +129,7 @@ public class AddSalon extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                            Toast.makeText(AddSalon.this, "Error: ".concat(databaseError.getMessage()), Toast.LENGTH_LONG).show();
                         }
                     });
 

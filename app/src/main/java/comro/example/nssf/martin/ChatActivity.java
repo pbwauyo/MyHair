@@ -307,6 +307,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 else if (!message.getImageMessage().isEmpty()) {
                     progressDialog.show();
+                    viewHolder.messageImageView.setVisibility(ImageView.VISIBLE);
                     Picasso.get()
                             .load(message.getImageMessage())
                             .fit()
@@ -322,7 +323,7 @@ public class ChatActivity extends AppCompatActivity {
 
                                 }
                             });
-                    viewHolder.messageImageView.setVisibility(ImageView.VISIBLE);
+
                     viewHolder.messageTextView.setVisibility(TextView.GONE);
                 }
 

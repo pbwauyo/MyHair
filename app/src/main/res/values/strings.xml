@@ -89,4 +89,5 @@
     <string name="call">CALL</string>
     <string name="send">SEND</string>
     <string name="typing">typing...</string>
+    <string name="loc">location</string>
 </resources>

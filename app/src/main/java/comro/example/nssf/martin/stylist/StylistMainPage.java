@@ -2,6 +2,7 @@ package comro.example.nssf.martin.stylist;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -15,10 +16,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +31,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
 
 import comro.example.nssf.martin.Login;
 import comro.example.nssf.martin.R;
@@ -69,6 +74,9 @@ public class StylistMainPage extends AppCompatActivity {
     private String userName;
     private String dpUrl;
     private float rating;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+    private boolean hasSalon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +85,9 @@ public class StylistMainPage extends AppCompatActivity {
         FirebaseMessaging.getInstance().subscribeToTopic("hairRequests");
         FirebaseMessaging.getInstance().unsubscribeFromTopic("hairRequestReplies");
         navigationView = findViewById(R.id.s_nav_view);
+
+        sharedPreferences = getPreferences(MODE_PRIVATE);
+        editor = sharedPreferences.edit();
 
 //        toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -253,7 +264,35 @@ public class StylistMainPage extends AppCompatActivity {
             case 0:
                 return new StylistHomePageFragment();
             case 2:
-                return new RegisterStyleFragment();
+                //salonExists = new HashMap<>();
+                detailsRef.child("salon_names").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        hasSalon = false;
+                        if(dataSnapshot.exists()){
+                            hasSalon = true;
+                            editor.putBoolean("hasSalon", hasSalon);
+                            Log.d("exists in if", "true");
+                        }
+                        editor.apply();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+                if(sharedPreferences.getBoolean("hasSalon", false)){
+                    return new RegisterStyleFragment();
+                }
+                else {
+                    Toast.makeText(StylistMainPage.this, "Please add a salon first", Toast.LENGTH_LONG).show();
+                    navItemIndex = 0;
+                    CURRENT_TAG = TAG_PROFILE;
+                    return new StylistHomePageFragment();
+                }
+
             case 3:
                 return new ViewBookingsFragment();
             default:
@@ -271,14 +310,8 @@ public class StylistMainPage extends AppCompatActivity {
         Runnable pendingRunnable = new Runnable() {
             @Override
             public void run() {
-//                coordinatorLayout.setVisibility(View.GONE);
 
                 Fragment fragment = getDisplayFragment();
-//                toolbar = fragment.getView().findViewById(R.id.stylist_toolbar);
-//                setSupportActionBar(toolbar);
-//                getSupportActionBar().setTitle(activities[navItemIndex]);
-
-
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
                 fragmentTransaction.replace(R.id.stylist_frame, fragment, CURRENT_TAG);

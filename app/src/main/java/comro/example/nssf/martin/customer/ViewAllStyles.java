@@ -82,8 +82,8 @@ public class ViewAllStyles extends AppCompatActivity {
                                 stylistName = dataSnapshot.child("stylists").child(stylistId).child("name").getValue().toString();
                                 stylistContact = dataSnapshot.child("stylists").child(stylistId).child("contact").getValue().toString();
                                 customerId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                customerName = dataSnapshot.child("customers").child("name").getValue().toString();
-                                customerContact = dataSnapshot.child("customers").child("contact").getValue().toString();
+                                customerName = dataSnapshot.child("customers").child(customerId).child("name").getValue().toString();
+                                customerContact = dataSnapshot.child("customers").child(customerId).child("contact").getValue().toString();
 
                                 if(dataSnapshot.child("imageUrl").exists() && !dataSnapshot.child("imageUrl").getValue().toString().isEmpty()) {
                                     customerImage = dataSnapshot.child("customers").child("imageUrl").getValue().toString();
@@ -92,7 +92,7 @@ public class ViewAllStyles extends AppCompatActivity {
                                 else{
                                     message = new Message("new hair request", customerName, customerId, "", stylistName, stylistId, requestId, "", styleName, styleImage, customerContact, stylistContact );
                                 }
-                                dataSnapshot.child("stylists").child(stylistId).child("notifications").child("requests").getRef().setValue(message);
+                                dataSnapshot.child("stylists").child(stylistId).child("notifications").child("requests").getRef().child(requestId).setValue(message);
                                 Toast.makeText(ViewAllStyles.this, "Request sent successfully", Toast.LENGTH_SHORT).show();
                             }
 
@@ -112,10 +112,5 @@ public class ViewAllStyles extends AppCompatActivity {
 
             }
         });
-
-        Log.d("arrayList size", String.valueOf(arrayList.size()));
-        Log.d("hashmap size", String.valueOf(hashMap.size()));
-
-
     }
 }

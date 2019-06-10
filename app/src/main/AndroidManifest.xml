@@ -24,13 +24,18 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_logo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ChatActivity"></activity>
+        <activity android:name=".ChatActivity"/>
         <activity android:name=".customer.ViewAllStyles" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -42,6 +47,8 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
+
 
         <activity
             android:name=".StylistsMapActivity"
@@ -86,15 +93,12 @@
             android:name=".stylist.StylistActions"
             android:label="@string/title_activity_stylist_actions" />
 
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+
 
         <activity android:name=".customer.CustomerSignUp" />
         <activity android:name=".stylist.StylistSignUp" />
         <activity android:name=".stylist.Stylist" />
         <activity android:name=".stylist.StyleDetails" />
-        <activity android:name=".customer.StylistList" />
         <activity android:name=".Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -104,14 +108,7 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name=".customer.SearchStyle" />
 
-        <service
-            android:name=".TrackerService"
-            android:enabled="true"
-            android:exported="true" />
-
-        <activity android:name=".TrackerActivity" />
     </application>
 
 </manifest>

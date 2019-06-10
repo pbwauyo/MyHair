@@ -181,7 +181,6 @@ public class ViewBookingsFragment extends Fragment {
                         dialPhoneNumber(bookingsList.get(position).getPhoneNumber());
                     }
                 });
-
                 recyclerView.setAdapter(bookingsAdapter);
             }
 

@@ -32,7 +32,7 @@ public class ViewStylistProfile extends AppCompatActivity {
     private RatingBar ratingBar;
     private TextView nameTxt, stylesTxt, followersTxt, emailTxt, phoneTxt, locationTxt ;
     private Button followBtn, requestBtn;
-    private String name, styles, followers, email, phone, location, rating;
+    private String name, styles, followers, email, phone, rating;
     private String currentUserId;
     private String requestId;
     private String stylistName, styleName;
@@ -138,12 +138,11 @@ public class ViewStylistProfile extends AppCompatActivity {
                 name = dataSnapshot.child("name").getValue().toString();
                 email = dataSnapshot.child("email").getValue().toString();
                 phone = dataSnapshot.child("contact").getValue().toString();
-                location = dataSnapshot.child("location").getValue().toString();
 
                 nameTxt.setText(name);
                 emailTxt.setText(email);
                 phoneTxt.setText(phone);
-                locationTxt.setText(location);
+                locationTxt.setText(getString(R.string.loc));
 
                 //set followers
                 if(!dataSnapshot.child("followers").exists()){

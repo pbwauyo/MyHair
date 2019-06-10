@@ -72,9 +72,9 @@ public class SearchFragment extends Fragment {
     private String mParam2;
 
     private Button searchButton;
-    private Spinner genderSpinner,  pricesSpinner;
+    private Spinner genderSpinner,  pricesSpinner, stylesSpinner;
     private DatabaseReference ref;
-    private EditText stylesTxt, locationTxt;
+    private EditText locationTxt;
     private StorageReference storageReference;
     private FirebaseAuth auth;
     private String userId;
@@ -93,7 +93,8 @@ public class SearchFragment extends Fragment {
     private int[] count = {0};
     private DatabaseReference locationsRef;
     private CustomerMainPage activity;
-
+    private Context context;
+	private DatabaseReference stylesRef;
 
     public SearchFragment() {
         // Required empty public constructor
@@ -125,6 +126,7 @@ public class SearchFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+		stylesRef = FirebaseDatabase.getInstance().getReference().child("styles");
         //sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         arrayList = new ArrayList<>();
         bundle = new Bundle();
@@ -166,7 +168,7 @@ public class SearchFragment extends Fragment {
 
         searchButton = view.findViewById(R.id.searchBtton);
         genderSpinner = view.findViewById(R.id.gender_spinner);
-        stylesTxt = view.findViewById(R.id.styles_txt);
+        stylesSpinner = view.findViewById(R.id.styles_spinner);
         pricesSpinner = view.findViewById(R.id.prices_spinner);
         locationTxt = view.findViewById(R.id.location_txt);
         coordinatorLayout = view.findViewById(R.id.search_coordinator_layout);
@@ -206,31 +208,76 @@ public class SearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        genderSpinner.setOnItemSelectedListener (new AdapterView.OnItemSelectedListener() {
+
+  
+        stylesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<String> styles = new ArrayList<>();
+                ArrayAdapter<String> stylesAdapter;
+
+                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    styles.add(snapshot.child("styleName").getValue().toString());
+                }
+
+                stylesAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, styles);
+                stylesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                stylesSpinner.setAdapter(stylesAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        stylesSpinner.setOnItemSelectedListener (new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected (AdapterView<?> adapterView, View view, int i, long l) {
-                String[] femalePriceRanges = getResources().getStringArray(R.array.price_ranges_female);
-                String[] malePriceRanges = getResources().getStringArray(R.array.price_ranges_male);
-
-                ArrayAdapter<String> adapter;
-
-                switch (adapterView.getItemAtPosition(i).toString()){
-                    case "male":
-                        // attaching data adapter to spinner
-                        adapter  = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, malePriceRanges);
-                        // Drop down layout style - list view with radio button
+//                String[] femalePriceRanges = getResources().getStringArray(R.array.price_ranges_female);
+//                String[] malePriceRanges =
+                
+                final String style = adapterView.getItemAtPosition(i).toString();
+				stylesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        String nodeStyle;
+                        ArrayList<String> list = new ArrayList<>();
+                        ArrayAdapter<String> adapter;
+                        for (DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            nodeStyle = snapshot.child("styleName").getValue().toString();
+                            if(style.toLowerCase().equals(nodeStyle.toLowerCase())){
+                                list.add(snapshot.child("price_range").getValue().toString());
+                            }
+                        }
+                        adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, list);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         pricesSpinner.setAdapter(adapter);
-                        break;
+                    }
 
-                    case "female":
-                        // attaching data adapter to spinner
-                        adapter  = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, femalePriceRanges);
-                        // Drop down layout style - list view with radio button
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        pricesSpinner.setAdapter(adapter);
-                        break;
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
+//                switch (adapterView.getItemAtPosition(i).toString()){
+//                    case "male":
+//                        // attaching data adapter to spinner
+//                        adapter  = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, malePriceRanges);
+//                        // Drop down layout style - list view with radio button
+//                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                        pricesSpinner.setAdapter(adapter);
+//                        break;
+//
+//                    case "female":
+//                        // attaching data adapter to spinner
+//                        adapter  = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, femalePriceRanges);
+//                        // Drop down layout style - list view with radio button
+//                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                        pricesSpinner.setAdapter(adapter);
+//                        break;
+//                }
             }
 
             @Override
@@ -244,7 +291,7 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 selectedGender = genderSpinner.getSelectedItem().toString().toLowerCase().trim();
-                selectedStyle = stylesTxt.getText().toString().toLowerCase().trim();
+                selectedStyle = stylesSpinner.getSelectedItem().toString().toLowerCase().trim();
                 selectedPrice = pricesSpinner.getSelectedItem().toString().trim();
                 location = locationTxt.getText().toString().toLowerCase().trim();
 
@@ -295,7 +342,7 @@ public class SearchFragment extends Fragment {
 
                     // if no location was input
                     else {
-                        ref.addValueEventListener(new ValueEventListener() {
+                        ref.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 arrayList = new ArrayList<>();
@@ -343,7 +390,6 @@ public class SearchFragment extends Fragment {
                                     bundle.putSerializable("styles", arrayList);
                                     intent.putExtras(bundle);
                                     startActivity(intent);
-                                    getActivity().finish();
                                 } else {
                                     Snackbar.make(coordinatorLayout, "Style doesn't exist", Snackbar.LENGTH_LONG).show();
                                 }
@@ -466,5 +512,6 @@ public class SearchFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        this.context = context;
     }
 }

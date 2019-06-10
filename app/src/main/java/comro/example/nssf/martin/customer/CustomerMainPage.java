@@ -133,7 +133,7 @@ public class CustomerMainPage extends AppCompatActivity {
         detailsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                name = dataSnapshot.child("name").getValue().toString();
+                name = dataSnapshot.child("name").getValue().toString();//get current users name
                 Log.d("name snapshot", name);
                 nameTxt.setText(name);
 
